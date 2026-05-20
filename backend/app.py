@@ -1,44 +1,56 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import requests
+
+from models import db, User
 
 app = Flask(__name__)
 CORS(app)
 
-API_URL = "https://jsonplaceholder.typicode.com/users"
+app.config[
+    "SQLALCHEMY_DATABASE_URI"
+] = "sqlite:///database.db"
 
-# Load users initially from API
-users = requests.get(API_URL).json()
+app.config[
+    "SQLALCHEMY_TRACK_MODIFICATIONS"
+] = False
+
+db.init_app(app)
+
+with app.app_context():
+    db.create_all()
+
 
 @app.route("/")
 def home():
     return {
-        "message": "User Management API Running",
-        "users_endpoint": "/users"
+        "message":
+        "User Management API Running"
     }
 
 
 # GET ALL USERS
 @app.route("/users", methods=["GET"])
 def get_users():
-    return jsonify(users)
+
+    users = User.query.all()
+
+    return jsonify(
+        [u.to_dict() for u in users]
+    )
 
 
-# GET SINGLE USER
+# GET USER BY ID
 @app.route("/users/<int:user_id>", methods=["GET"])
 def get_user(user_id):
 
-    user = next(
-        (u for u in users if u["id"] == user_id),
-        None
-    )
+    user = User.query.get(user_id)
 
     if not user:
         return jsonify({
             "error": "User not found"
         }), 404
 
-    return jsonify(user)
+    return jsonify(user.to_dict())
 
 
 # CREATE USER
@@ -47,30 +59,43 @@ def create_user():
 
     data = request.get_json()
 
-    new_user = {
-        "id": max([u["id"] for u in users]) + 1,
-        "name": data.get("name"),
-        "email": data.get("email"),
-        "role": data.get("role", "Developer"),
-        "company": {
-            "name": data.get("company", "")
-        },
-        "website": data.get("website", "")
-    }
+    if not data.get("name"):
+        return jsonify({
+            "error": "Name required"
+        }), 400
 
-    users.append(new_user)
+    if not data.get("email"):
+        return jsonify({
+            "error": "Email required"
+        }), 400
 
-    return jsonify(new_user), 201
+    if not data.get("role"):
+        return jsonify({
+            "error": "Role required"
+        }), 400
+
+    user = User(
+        name=data["name"],
+        email=data["email"],
+        role=data["role"],
+        bio=data.get("bio", ""),
+        company=data.get("company", ""),
+        website=data.get("website", "")
+    )
+
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify(
+        user.to_dict()
+    ), 201
 
 
 # UPDATE USER
 @app.route("/users/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
 
-    user = next(
-        (u for u in users if u["id"] == user_id),
-        None
-    )
+    user = User.query.get(user_id)
 
     if not user:
         return jsonify({
@@ -79,57 +104,60 @@ def update_user(user_id):
 
     data = request.get_json()
 
-    user["name"] = data.get(
+    user.name = data.get(
         "name",
-        user["name"]
+        user.name
     )
 
-    user["email"] = data.get(
+    user.email = data.get(
         "email",
-        user["email"]
+        user.email
     )
 
-    user["website"] = data.get(
-        "website",
-        user["website"]
-    )
-
-    user["role"] = data.get(
+    user.role = data.get(
         "role",
-        user.get("role", "")
+        user.role
     )
 
-    if "company" in data:
-        user["company"] = {
-            "name": data["company"]
-        }
+    user.bio = data.get(
+        "bio",
+        user.bio
+    )
 
-    return jsonify(user)
+    user.company = data.get(
+        "company",
+        user.company
+    )
+
+    user.website = data.get(
+        "website",
+        user.website
+    )
+
+    db.session.commit()
+
+    return jsonify(
+        user.to_dict()
+    )
 
 
 # DELETE USER
 @app.route("/users/<int:user_id>", methods=["DELETE"])
 def delete_user(user_id):
 
-    global users
-
-    user = next(
-        (u for u in users if u["id"] == user_id),
-        None
-    )
+    user = User.query.get(user_id)
 
     if not user:
         return jsonify({
             "error": "User not found"
         }), 404
 
-    users = [
-        u for u in users
-        if u["id"] != user_id
-    ]
+    db.session.delete(user)
+    db.session.commit()
 
     return jsonify({
-        "message": "User deleted successfully"
+        "message":
+        "User deleted successfully"
     })
 
 

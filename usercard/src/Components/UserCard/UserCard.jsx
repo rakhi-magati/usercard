@@ -32,6 +32,15 @@ function UserCard({
               })
             }
           />
+          <input
+            value={formData.bio}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                bio: e.target.value,
+              })
+            }
+          />
 
           <input
             value={formData.email}
@@ -76,6 +85,10 @@ function UserCard({
 
           <h2>{user.name}</h2>
 
+          <p>
+            <strong>Bio:</strong>
+            {user.bio}
+          </p>
           <p>
             Email:
             {user.email}

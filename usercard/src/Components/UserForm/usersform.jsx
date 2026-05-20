@@ -4,6 +4,7 @@ function UserForm({ addUser }) {
   const [formData, setFormData] =
     useState({
       name: "",
+      bio: "",
       email: "",
       role: "",
       company: "",
@@ -17,6 +18,7 @@ function UserForm({ addUser }) {
 
     setFormData({
       name: "",
+      bio: "",
       email: "",
       role: "",
       company: "",
@@ -33,6 +35,17 @@ function UserForm({ addUser }) {
           setFormData({
             ...formData,
             name: e.target.value,
+          })
+        }
+      />
+
+      <input
+        placeholder="Bio"
+        value={formData.bio}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            bio: e.target.value,
           })
         }
       />
