@@ -1,0 +1,35 @@
+[
+  {
+    "id": 1,
+    "name": "Rakesh",
+    "email": "rakesh@gmail.com",
+    "role": "Frontend Developer",
+    "bio": "React Developer",
+    "company": "OpenAI",
+    "website": "https://openai.com",
+    "city": "Nellore",
+    "image": "https://i.pravatar.cc/300?img=1"
+  },
+  {
+    "id": 2,
+    "name": "Rahul",
+    "email": "rahul@gmail.com",
+    "role": "Backend Developer",
+    "bio": "Python Flask Developer",
+    "company": "Google",
+    "website": "https://google.com",
+    "city": "Hyderabad",
+    "image": "https://i.pravatar.cc/300?img=2"
+  },
+  {
+    "id": 3,
+    "name": "Anjali",
+    "email": "anjali@gmail.com",
+    "role": "UI/UX Designer",
+    "bio": "Creative UI Designer",
+    "company": "Microsoft",
+    "website": "https://microsoft.com",
+    "city": "Chennai",
+    "image": "https://i.pravatar.cc/300?img=3"
+  }
+]
