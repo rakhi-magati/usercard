@@ -3,7 +3,7 @@
   margin: 0 auto;
   padding: 30px;
   min-height: 100vh;
-  background: #f4f4f4;
+  background: #e24f4f;
 }
 
 .users-grid {
@@ -17,7 +17,7 @@
 }
 
 .card {
-  background: #ffffff;
+  background: #d64747;
 
   border-radius: 18px;
 

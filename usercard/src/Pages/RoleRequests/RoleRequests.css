@@ -1,0 +1,133 @@
+.role-requests-page {
+  padding: 30px;
+  background: #f5f7fb;
+  min-height: 100vh;
+}
+
+.role-requests-page h2 {
+  font-size: 28px;
+  color: #1f2937;
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+.requests-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.requests-table thead {
+  background: #2563eb;
+  color: white;
+}
+
+.requests-table th {
+  padding: 18px;
+  text-align: left;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.requests-table td {
+  padding: 18px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+  font-size: 14px;
+}
+
+.requests-table tbody tr {
+  transition: all 0.3s ease;
+}
+
+.requests-table tbody tr:hover {
+  background: #f9fafb;
+}
+
+.requests-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.requests-table button {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.requests-table button:first-child {
+  background: #10b981;
+  color: white;
+}
+
+.requests-table button:first-child:hover {
+  background: #059669;
+  transform: translateY(-2px);
+}
+
+.requests-table button:last-child {
+  background: #ef4444;
+  color: white;
+}
+
+.requests-table button:last-child:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+.status-pending {
+  background: #fef3c7;
+  color: #b45309;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-approved {
+  background: #d1fae5;
+  color: #065f46;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.no-requests {
+  text-align: center;
+  padding: 30px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .role-requests-page {
+    padding: 15px;
+  }
+
+  .requests-table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  .requests-table button {
+    margin-bottom: 8px;
+  }
+}

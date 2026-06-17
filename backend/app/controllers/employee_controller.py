@@ -1,23 +1,50 @@
-import requests
+from app.services.employee_service import (
+    get_all_employees,
+    get_employee_by_id,
+    add_employee,
+    update_employee,
+    delete_employee,
+)
+from app.services.employee_service import (
+    import_jsonplaceholder_users
+)
 
-BASE_URL = "https://jsonplaceholder.typicode.com/users"
+def import_users():
+    return import_jsonplaceholder_users()
 
 
-def get_all_employees():
-    response = requests.get(BASE_URL)
+def fetch_all_employees(company_id):
+    return get_all_employees(company_id)
 
-    if response.status_code == 200:
-        return response.json()
-
-    return []
-
-
-def get_employee_by_id(employee_id: int):
-    response = requests.get(
-        f"{BASE_URL}/{employee_id}"
+def fetch_employee_by_id(
+    employee_id
+):
+    return get_employee_by_id(
+        employee_id
     )
 
-    if response.status_code == 200:
-        return response.json()
 
-    return None
+def create_employee(
+    employee_data
+):
+    return add_employee(
+        employee_data
+    )
+
+
+def edit_employee(
+    employee_id,
+    data
+):
+    return update_employee(
+        employee_id,
+        data
+    )
+
+
+def remove_employee(
+    employee_id
+):
+    return delete_employee(
+        employee_id
+    )

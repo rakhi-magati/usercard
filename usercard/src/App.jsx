@@ -1,28 +1,54 @@
-// import "./App.css";
-// import Dashboard from "./Components/DashBoard/Dashboard";
-// import DynamicUserCard from "./Components/DynamicCard/DynamicUserCard";
-// import ProfileCard from "./Components/Profilecard/ProfileCard";
-import AppRoutes from "./routes/AppRoutes";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-
+import AppRotes from "./Routes/AppRoutes";
 function App() {
-  return (
-    // <div className="container">
-    //   {/* <div>
-    //     <h1 className="title"> Static Profile Card</h1>
-    //     <ProfileCard />
-    //   </div>
 
-    //   <div>
-    //     <h1 className="title"> Dynamic Profile Card </h1>
-    //     <DynamicUserCard />
-    //   </div> */}
-    //   {/* <Dashboard/> */}
-    //   <AppRoutes/>
-    // </div>
-    <div>
-      <AppRoutes/>
-    </div>
+  const [darkMode, setDarkMode] =
+    useState(
+      localStorage.getItem("theme") ===
+      "dark"
+    );
+  useEffect(() => {
+
+    if (darkMode) {
+
+      document.body.classList.add(
+        "dark-theme"
+      );
+
+      document.body.classList.remove(
+        "light-theme"
+      );
+
+      localStorage.setItem(
+        "theme",
+        "dark"
+      );
+
+    } else {
+
+      document.body.classList.add(
+        "light-theme"
+      );
+
+      document.body.classList.remove(
+        "dark-theme"
+      );
+
+      localStorage.setItem(
+        "theme",
+        "light"
+      );
+    }
+
+  }, [darkMode]);
+
+  return (
+    <AppRotes
+      darkMode={darkMode}
+      setDarkMode={setDarkMode}
+    />
   );
 }
 

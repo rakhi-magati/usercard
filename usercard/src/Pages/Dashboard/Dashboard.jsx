@@ -1,9 +1,12 @@
+import { useEffect, useState } from "react";
+
 import {
   FaUsers,
   FaUserCheck,
   FaCalendarAlt,
   FaBuilding,
 } from "react-icons/fa";
+
 import {
   LineChart,
   Line,
@@ -12,159 +15,409 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
+  PieChart,
+  Pie,
+  Cell,
+  BarChart,
+  Bar,
 } from "recharts";
 
 import StatCard from "../../Components/StatCard/StatCard";
+import { getEmployees } from "../../services/employeeService";
+
 import "./Dashboard.css";
 
-const chartData = [
-  { day: "Mon", employees: 120 },
-  { day: "Tue", employees: 160 },
-  { day: "Wed", employees: 210 },
-  { day: "Thu", employees: 260 },
-  { day: "Fri", employees: 180 },
-  { day: "Sat", employees: 110 },
-  { day: "Sun", employees: 125 },
-];
-
 function Dashboard() {
+  const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      setLoading(true);
+
+      const employeesData =
+        await getEmployees();
+
+      setEmployees(
+        Array.isArray(employeesData)
+          ? employeesData
+          : []
+      );
+
+      setError("");
+
+    } catch (err) {
+
+      setError(
+        "Failed to load employees"
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+  };
+
+  const totalEmployees =
+    employees.length;
+
+  const activeEmployees =
+    employees.length;
+
+  const departments =
+    new Set(
+      employees.map(
+        (emp) =>
+          emp.department ||
+          "Unknown"
+      )
+    ).size;
+
+  const chartData =
+    employees.map(
+      (emp, index) => ({
+        day: `Emp ${index + 1}`,
+        employees: index + 1,
+      })
+    );
+
+  const departmentData = [
+    {
+      name: "IT",
+      value: 15,
+    },
+    {
+      name: "HR",
+      value: 8,
+    },
+    {
+      name: "Finance",
+      value: 6,
+    },
+    {
+      name: "Sales",
+      value: 10,
+    },
+  ];
+
+  const attendanceData = [
+    {
+      day: "Mon",
+      attendance: 90,
+    },
+    {
+      day: "Tue",
+      attendance: 85,
+    },
+    {
+      day: "Wed",
+      attendance: 92,
+    },
+    {
+      day: "Thu",
+      attendance: 88,
+    },
+    {
+      day: "Fri",
+      attendance: 95,
+    },
+  ];
+
+  const COLORS = [
+    "#2563eb",
+    "#10b981",
+    "#f59e0b",
+    "#ef4444",
+  ];
+
+  if (loading) {
+    return (
+      <div className="loading">
+        Loading Dashboard...
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="error-box">
+        <h3>{error}</h3>
+
+        <button
+          onClick={
+            fetchEmployees
+          }
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard">
 
+      {/* Header */}
+
       <div className="dashboard-header">
+
         <div>
-          <h1>Dashboard</h1>
-          <p>Welcome back, Admin! Here's what's happening.</p>
+          <h1>
+            Dashboard
+          </h1>
+
+          <p>
+            Welcome back,
+            Admin 👋
+          </p>
         </div>
 
         <div className="date-box">
-          📅 May 21, 2025
+          📅{" "}
+          {new Date().toLocaleDateString()}
         </div>
+
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats */}
 
       <div className="stats-grid">
 
         <StatCard
           title="Total Employees"
-          value="256"
+          value={
+            totalEmployees
+          }
           icon={<FaUsers />}
-          growth="+12.5% from last month"
-          color="#3B82F6"
         />
 
         <StatCard
           title="Active Employees"
-          value="210"
-          icon={<FaUserCheck />}
-          growth="+8.3% from last month"
-          color="#10B981"
+          value={
+            activeEmployees
+          }
+          icon={
+            <FaUserCheck />
+          }
         />
 
         <StatCard
-          title="Attendance Today"
+          title="Attendance"
           value="92%"
-          icon={<FaCalendarAlt />}
-          growth="+5.4% from yesterday"
-          color="#8B5CF6"
+          icon={
+            <FaCalendarAlt />
+          }
         />
 
         <StatCard
           title="Departments"
-          value="12"
-          icon={<FaBuilding />}
-          growth="No change"
-          color="#F59E0B"
+          value={departments}
+          icon={
+            <FaBuilding />
+          }
         />
+
       </div>
 
-      {/* Bottom Section */}
+      {/* Overview */}
 
       <div className="bottom-grid">
 
         <div className="chart-card">
+
           <div className="card-top">
-            <h3>Employee Overview</h3>
-
-            <select>
-              <option>This Week</option>
-            </select>
+            <h3>
+              Employee Overview
+            </h3>
           </div>
 
-          <div className="chart-container">
-            <ResponsiveContainer
-              width="100%"
-              height={300}
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+          >
+            <LineChart
+              data={chartData}
             >
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
+              <CartesianGrid strokeDasharray="3 3" />
 
-                <XAxis dataKey="day" />
+              <XAxis dataKey="day" />
 
-                <YAxis />
+              <YAxis />
 
-                <Tooltip />
+              <Tooltip />
 
-                <Line
-                  type="monotone"
-                  dataKey="employees"
-                  stroke="#2563eb"
-                  strokeWidth={3}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+              <Line
+                type="monotone"
+                dataKey="employees"
+                stroke="#2563eb"
+                strokeWidth={3}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+
         </div>
 
         <div className="recent-card">
-          <div className="card-top">
-            <h3>Recent Employees</h3>
 
-            <span className="view-all">
-              View All
-            </span>
-          </div>
+          <h3>
+            Recent Employees
+          </h3>
 
-          <div className="employee-item">
-            <img src="https://i.pravatar.cc/40?img=1" />
-            <div>
-              <h4>John Doe</h4>
-              <p>Developer</p>
-            </div>
-            <span>IT Department</span>
-          </div>
+          {employees
+            .slice(0, 5)
+            .map(
+              (employee) => (
+                <div
+                  key={
+                    employee.id
+                  }
+                  className="employee-item"
+                >
+                  <img
+                    src={`https://i.pravatar.cc/40?u=${employee.id}`}
+                    alt=""
+                  />
 
-          <div className="employee-item">
-            <img src="https://i.pravatar.cc/40?img=2" />
-            <div>
-              <h4>Jane Smith</h4>
-              <p>UI/UX Designer</p>
-            </div>
-            <span>Design Department</span>
-          </div>
+                  <div>
+                    <h4>
+                      {
+                        employee.name
+                      }
+                    </h4>
 
-          <div className="employee-item">
-            <img src="https://i.pravatar.cc/40?img=3" />
-            <div>
-              <h4>Michael Johnson</h4>
-              <p>HR Manager</p>
-            </div>
-            <span>HR Department</span>
-          </div>
+                    <p>
+                      Employee
+                    </p>
+                  </div>
 
-          <div className="employee-item">
-            <img src="https://i.pravatar.cc/40?img=4" />
-            <div>
-              <h4>Emily Davis</h4>
-              <p>Data Analyst</p>
-            </div>
-            <span>Analytics Department</span>
-          </div>
+                  <span>
+                    {
+                      employee.department
+                    }
+                  </span>
+
+                </div>
+              )
+            )}
 
         </div>
 
       </div>
+
+      {/* Analytics */}
+
+      <div className="analytics-grid">
+
+        <div className="chart-card">
+
+          <h3>
+            Department Distribution
+          </h3>
+
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+          >
+            <PieChart>
+
+              <Pie
+                data={
+                  departmentData
+                }
+                dataKey="value"
+                outerRadius={100}
+                label
+              >
+                {departmentData.map(
+                  (
+                    entry,
+                    index
+                  ) => (
+                    <Cell
+                      key={
+                        index
+                      }
+                      fill={
+                        COLORS[
+                          index
+                        ]
+                      }
+                    />
+                  )
+                )}
+              </Pie>
+
+              <Tooltip />
+
+            </PieChart>
+          </ResponsiveContainer>
+
+        </div>
+
+        <div className="chart-card">
+
+          <h3>
+            Attendance Analytics
+          </h3>
+
+          <ResponsiveContainer
+            width="100%"
+            height={300}
+          >
+            <BarChart
+              data={
+                attendanceData
+              }
+            >
+              <XAxis dataKey="day" />
+
+              <YAxis />
+
+              <Tooltip />
+
+              <Bar
+                dataKey="attendance"
+                fill="#2563eb"
+              />
+            </BarChart>
+          </ResponsiveContainer>
+
+        </div>
+
+      </div>
+
+      {/* Activity */}
+
+      <div className="activity-card">
+
+        <h3>
+          Recent Activity
+        </h3>
+
+        <div className="activity-item">
+          ✓ Employee Added
+        </div>
+
+        <div className="activity-item">
+          ✓ Employee Updated
+        </div>
+
+        <div className="activity-item">
+          ✓ Attendance Updated
+        </div>
+
+        <div className="activity-item">
+          ✓ Department Created
+        </div>
+
+      </div>
+
     </div>
   );
 }
