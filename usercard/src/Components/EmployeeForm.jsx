@@ -11,7 +11,7 @@ function EmployeeForm({
 
   
 
-  // ✅ Form validation check
+  //  Form validation check
   const isFormValid =
     formData.name?.trim() &&
     formData.email?.trim() &&

@@ -1,14 +1,12 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "../Pages/Login/Login";
 import Signup from "../Pages/Signup/Signup";
 import ForgotPassword from "../Pages/ForgotPassword";
+import AcceptInvitation from "../Pages/AcceptInvitation/AcceptInvitation";
+import AccountDeactivated from "../Pages/AccountDeactivated/AccountDeactivated";
 
-import DashboardLayout from "../Layouts/DashboardLayout";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 import Dashboard from "../Pages/Dashboard/Dashboard";
 import Employees from "../Pages/Employees/Employees";
@@ -17,64 +15,37 @@ import Attendance from "../Pages/Attendance/Attendance";
 import Settings from "../Pages/Settings/Settings";
 import AddEmployee from "../Pages/AddEmployee/AddEmployee";
 import RoleRequests from "../Pages/RoleRequests/RoleRequests";
+import AuditLogs from "../Pages/AuditLogs/AuditLogs";
+import Invitations from "../Pages/Invitations/Invitations";
+import ReactivationRequests from "../Pages/ReactivationRequests/ReactivationRequests";
 
 import ProtectedRoute from "../Components/ProtectedRoute/ProtectedRoute";
-import AuditLogs from "../Pages/AuditLogs/AuditLogs";
 
-function AppRoutes({
-  darkMode,
-  setDarkMode,
-}) {
+function AppRoutes({ darkMode, setDarkMode }) {
   return (
     <BrowserRouter>
       <Routes>
-
         {/* Public Routes */}
-        <Route
-          path="/"
-          element={<Login />}
-        />
-
-        <Route
-          path="/signup"
-          element={<Signup />}
-        />
-
-        <Route
-          path="/forgot-password"
-          element={<ForgotPassword />}
-        />
+        <Route path="/" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/accept-invitation" element={<AcceptInvitation />} />
+        <Route path="/account-deactivated" element={<AccountDeactivated />} />
 
         {/* Protected Routes */}
         <Route
           element={
-            <ProtectedRoute
-              allowedRoles={[
-                "admin",
-                "user",
-              ]}
-            >
-              <DashboardLayout
-                darkMode={darkMode}
-                setDarkMode={setDarkMode}
-              />
+            <ProtectedRoute allowedRoles={["admin", "user"]}>
+              <DashboardLayout darkMode={darkMode} setDarkMode={setDarkMode} />
             </ProtectedRoute>
           }
         >
-          <Route
-            path="/dashboard"
-            element={<Dashboard />}
-          />
+          <Route path="/dashboard" element={<Dashboard />} />
 
           <Route
             path="/employees"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "admin",
-                  "user",
-                ]}
-              >
+              <ProtectedRoute allowedRoles={["admin", "user"]}>
                 <Employees />
               </ProtectedRoute>
             }
@@ -83,11 +54,7 @@ function AppRoutes({
           <Route
             path="/employees/add"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "admin",
-                ]}
-              >
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <AddEmployee />
               </ProtectedRoute>
             }
@@ -96,11 +63,7 @@ function AppRoutes({
           <Route
             path="/departments"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "admin",
-                ]}
-              >
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <Departments />
               </ProtectedRoute>
             }
@@ -109,53 +72,50 @@ function AppRoutes({
           <Route
             path="/attendance"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "admin",
-                ]}
-              >
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <Attendance />
               </ProtectedRoute>
             }
           />
 
-          {/* USER ONLY */}
           <Route
             path="/settings"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "user",
-                ]}
-              >
+              <ProtectedRoute allowedRoles={["user"]}>
                 <Settings />
               </ProtectedRoute>
             }
           />
 
-          {/* ADMIN ONLY */}
           <Route
             path="/role-requests"
             element={
-              <ProtectedRoute
-                allowedRoles={[
-                  "admin",
-                ]}
-              >
+              <ProtectedRoute allowedRoles={["admin"]}>
                 <RoleRequests />
               </ProtectedRoute>
             }
           />
 
-          {/* Audit Logs Route */}
-
           <Route
-            path="/audit-logs"
-            element={<AuditLogs />}
+            path="/invitations"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <Invitations />
+              </ProtectedRoute>
+            }
           />
 
-        </Route>
+          <Route
+            path="/reactivation-requests"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <ReactivationRequests />
+              </ProtectedRoute>
+            }
+          />
 
+          <Route path="/audit-logs" element={<AuditLogs />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   );

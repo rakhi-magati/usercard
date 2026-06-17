@@ -1,423 +1,131 @@
-import { useEffect, useState } from "react";
-
+import { useEffect, useState, useCallback } from "react";
 import {
-  FaUsers,
-  FaUserCheck,
-  FaCalendarAlt,
-  FaBuilding,
+  FaUsers, FaUserCheck, FaBuilding, FaClock, FaSyncAlt,
 } from "react-icons/fa";
-
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
+  PieChart, Pie, Cell, BarChart, Bar,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
-
 import StatCard from "../../Components/StatCard/StatCard";
-import { getEmployees } from "../../services/employeeService";
-
+import { getAnalytics } from "../../services/employeeService";
 import "./Dashboard.css";
 
+const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"];
+
 function Dashboard() {
-  const [employees, setEmployees] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [lastRefresh, setLastRefresh] = useState(new Date());
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
+  const companyId = parseInt(localStorage.getItem("company_id") || "1");
 
-  const fetchEmployees = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
-
-      const employeesData =
-        await getEmployees();
-
-      setEmployees(
-        Array.isArray(employeesData)
-          ? employeesData
-          : []
-      );
-
+      const data = await getAnalytics(companyId);
+      setAnalytics(data);
+      setLastRefresh(new Date());
       setError("");
-
     } catch (err) {
-
-      setError(
-        "Failed to load employees"
-      );
-
+      setError("Failed to load analytics");
     } finally {
-
       setLoading(false);
-
     }
-  };
+  }, [companyId]);
 
-  const totalEmployees =
-    employees.length;
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
 
-  const activeEmployees =
-    employees.length;
+  if (loading) return <div className="loading">Loading Dashboard...</div>;
 
-  const departments =
-    new Set(
-      employees.map(
-        (emp) =>
-          emp.department ||
-          "Unknown"
-      )
-    ).size;
-
-  const chartData =
-    employees.map(
-      (emp, index) => ({
-        day: `Emp ${index + 1}`,
-        employees: index + 1,
-      })
-    );
-
-  const departmentData = [
-    {
-      name: "IT",
-      value: 15,
-    },
-    {
-      name: "HR",
-      value: 8,
-    },
-    {
-      name: "Finance",
-      value: 6,
-    },
-    {
-      name: "Sales",
-      value: 10,
-    },
-  ];
-
-  const attendanceData = [
-    {
-      day: "Mon",
-      attendance: 90,
-    },
-    {
-      day: "Tue",
-      attendance: 85,
-    },
-    {
-      day: "Wed",
-      attendance: 92,
-    },
-    {
-      day: "Thu",
-      attendance: 88,
-    },
-    {
-      day: "Fri",
-      attendance: 95,
-    },
-  ];
-
-  const COLORS = [
-    "#2563eb",
-    "#10b981",
-    "#f59e0b",
-    "#ef4444",
-  ];
-
-  if (loading) {
-    return (
-      <div className="loading">
-        Loading Dashboard...
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="error-box">
-        <h3>{error}</h3>
-
-        <button
-          onClick={
-            fetchEmployees
-          }
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+  if (error) return (
+    <div className="error-box">
+      <h3>{error}</h3>
+      <button onClick={fetchAnalytics}>Retry</button>
+    </div>
+  );
 
   return (
     <div className="dashboard">
-
-      {/* Header */}
-
       <div className="dashboard-header">
-
         <div>
-          <h1>
-            Dashboard
-          </h1>
-
-          <p>
-            Welcome back,
-            Admin 👋
-          </p>
+          <h1>Dashboard</h1>
+          <p>Welcome back, Admin 👋</p>
         </div>
-
-        <div className="date-box">
-          📅{" "}
-          {new Date().toLocaleDateString()}
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <button className="refresh-btn" onClick={fetchAnalytics} title="Refresh">
+            <FaSyncAlt /> Refresh
+          </button>
+          <div className="date-box">📅 {new Date().toLocaleDateString()}</div>
         </div>
-
       </div>
-
-      {/* Stats */}
 
       <div className="stats-grid">
-
-        <StatCard
-          title="Total Employees"
-          value={
-            totalEmployees
-          }
-          icon={<FaUsers />}
-        />
-
-        <StatCard
-          title="Active Employees"
-          value={
-            activeEmployees
-          }
-          icon={
-            <FaUserCheck />
-          }
-        />
-
-        <StatCard
-          title="Attendance"
-          value="92%"
-          icon={
-            <FaCalendarAlt />
-          }
-        />
-
-        <StatCard
-          title="Departments"
-          value={departments}
-          icon={
-            <FaBuilding />
-          }
-        />
-
+        <StatCard title="Total Employees" value={analytics?.total_employees ?? 0} icon={<FaUsers />} color="#2563eb" />
+        <StatCard title="Active Employees" value={analytics?.active_employees ?? 0} icon={<FaUserCheck />} color="#10b981" />
+        <StatCard title="Total Departments" value={analytics?.total_departments ?? 0} icon={<FaBuilding />} color="#f59e0b" />
+        <StatCard title="Pending Requests" value={analytics?.pending_requests ?? 0} icon={<FaClock />} color="#ef4444" />
       </div>
-
-      {/* Overview */}
-
-      <div className="bottom-grid">
-
-        <div className="chart-card">
-
-          <div className="card-top">
-            <h3>
-              Employee Overview
-            </h3>
-          </div>
-
-          <ResponsiveContainer
-            width="100%"
-            height={300}
-          >
-            <LineChart
-              data={chartData}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-
-              <XAxis dataKey="day" />
-
-              <YAxis />
-
-              <Tooltip />
-
-              <Line
-                type="monotone"
-                dataKey="employees"
-                stroke="#2563eb"
-                strokeWidth={3}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-
-        </div>
-
-        <div className="recent-card">
-
-          <h3>
-            Recent Employees
-          </h3>
-
-          {employees
-            .slice(0, 5)
-            .map(
-              (employee) => (
-                <div
-                  key={
-                    employee.id
-                  }
-                  className="employee-item"
-                >
-                  <img
-                    src={`https://i.pravatar.cc/40?u=${employee.id}`}
-                    alt=""
-                  />
-
-                  <div>
-                    <h4>
-                      {
-                        employee.name
-                      }
-                    </h4>
-
-                    <p>
-                      Employee
-                    </p>
-                  </div>
-
-                  <span>
-                    {
-                      employee.department
-                    }
-                  </span>
-
-                </div>
-              )
-            )}
-
-        </div>
-
-      </div>
-
-      {/* Analytics */}
 
       <div className="analytics-grid">
-
         <div className="chart-card">
-
-          <h3>
-            Department Distribution
-          </h3>
-
-          <ResponsiveContainer
-            width="100%"
-            height={300}
-          >
+          <h3>Employee Distribution by Department</h3>
+          <ResponsiveContainer width="100%" height={280}>
             <PieChart>
-
               <Pie
-                data={
-                  departmentData
-                }
+                data={analytics?.department_distribution || []}
                 dataKey="value"
+                nameKey="name"
                 outerRadius={100}
-                label
+                label={({ name, value }) => `${name}: ${value}`}
               >
-                {departmentData.map(
-                  (
-                    entry,
-                    index
-                  ) => (
-                    <Cell
-                      key={
-                        index
-                      }
-                      fill={
-                        COLORS[
-                          index
-                        ]
-                      }
-                    />
-                  )
-                )}
+                {(analytics?.department_distribution || []).map((_, i) => (
+                  <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                ))}
               </Pie>
-
               <Tooltip />
-
+              <Legend />
             </PieChart>
           </ResponsiveContainer>
-
         </div>
 
         <div className="chart-card">
-
-          <h3>
-            Attendance Analytics
-          </h3>
-
-          <ResponsiveContainer
-            width="100%"
-            height={300}
-          >
-            <BarChart
-              data={
-                attendanceData
-              }
-            >
-              <XAxis dataKey="day" />
-
-              <YAxis />
-
+          <h3>Employee Count by Role</h3>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={analytics?.role_distribution || []}>
+              <XAxis dataKey="name" />
+              <YAxis allowDecimals={false} />
               <Tooltip />
-
-              <Bar
-                dataKey="attendance"
-                fill="#2563eb"
-              />
+              <Bar dataKey="value" fill="#2563eb" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-
         </div>
 
+        <div className="chart-card">
+          <h3>Employee Status Overview</h3>
+          <ResponsiveContainer width="100%" height={280}>
+            <BarChart data={analytics?.status_overview || []}>
+              <XAxis dataKey="name" />
+              <YAxis allowDecimals={false} />
+              <Tooltip />
+              <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                {(analytics?.status_overview || []).map((entry, i) => (
+                  <Cell
+                    key={i}
+                    fill={entry.name === "active" ? "#10b981" : entry.name === "inactive" ? "#ef4444" : "#f59e0b"}
+                  />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
-      {/* Activity */}
-
-      <div className="activity-card">
-
-        <h3>
-          Recent Activity
-        </h3>
-
-        <div className="activity-item">
-          ✓ Employee Added
-        </div>
-
-        <div className="activity-item">
-          ✓ Employee Updated
-        </div>
-
-        <div className="activity-item">
-          ✓ Attendance Updated
-        </div>
-
-        <div className="activity-item">
-          ✓ Department Created
-        </div>
-
+      <div className="refresh-info">
+        Last refreshed: {lastRefresh.toLocaleTimeString()}
       </div>
-
     </div>
   );
 }

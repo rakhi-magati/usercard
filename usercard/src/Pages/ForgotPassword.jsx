@@ -2,7 +2,7 @@ import {
     useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
-
+import "./ForgotPassword.css";
 
 function ForgotPassword() {
 
@@ -63,50 +63,61 @@ function ForgotPassword() {
         };
 
     return (
+        <div className="forgot-container">
+            <div className="forgot-card">
 
-        <form
-            onSubmit={
-                resetPassword
-            }
-        >
+                <h2>Forgot Password</h2>
 
-            <input
+                <p>
+                    Enter your email and create a new password
+                </p>
 
-                placeholder="Email"
+                <form onSubmit={resetPassword}>
 
-                type="email"
+                    <div className="form-group">
+                        <label>Email Address</label>
+                        <input
+                            type="email"
+                            placeholder="Enter email"
+                            value={email}
+                            onChange={(e) =>
+                                setEmail(e.target.value)
+                            }
+                            required
+                        />
+                    </div>
 
-                value={email}
+                    <div className="form-group">
+                        <label>New Password</label>
+                        <input
+                            type="password"
+                            placeholder="Enter new password"
+                            value={password}
+                            onChange={(e) =>
+                                setPassword(e.target.value)
+                            }
+                            required
+                        />
+                    </div>
 
-                onChange={(e) =>
-                    setEmail(
-                        e.target.value
-                    )
-                }
-            />
+                    <button
+                        type="submit"
+                        className="reset-btn"
+                    >
+                        Update Password
+                    </button>
 
-            <input
+                    <button
+                        type="button"
+                        className="back-btn"
+                        onClick={() => navigate("/")}
+                    >
+                        Back to Login
+                    </button>
 
-                placeholder="New Password"
-
-                type="password"
-
-                value={password}
-
-                onChange={(e) =>
-                    setPassword(
-                        e.target.value
-                    )
-                }
-            />
-
-            <button>
-
-                Update Password
-
-            </button>
-
-        </form>
+                </form>
+            </div>
+        </div>
     );
 }
 

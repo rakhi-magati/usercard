@@ -3,22 +3,25 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.database import Base, engine
 
-# IMPORTANT: create_all mundhu models import cheyyali
+# Import all models before create_all
 from app.models.company_model import Company
 from app.models.employee_model import Employee
 from app.models.audit_log_model import AuditLog
+from app.models.invitation_model import Invitation
+from app.models.reactivation_model import ReactivationRequest
+from app.models.notification_model import Notification
+
+# Import all routers
+from app.routes.employee_routes import router as employee_router
 from app.routes.audit_routes import router as audit_router
-from app.routes.employee_routes import router
-
-from app.routes.audit_routes import (
-    router as audit_router
-)
-
-
+from app.routes.analytics_routes import router as analytics_router
+from app.routes.invitation_routes import router as invitation_router
+from app.routes.reactivation_routes import router as reactivation_router
+from app.routes.notification_routes import router as notification_router
 
 app = FastAPI()
 
-# Tables create avuthayi
+# Create all tables
 Base.metadata.create_all(bind=engine)
 
 # CORS
@@ -30,12 +33,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Routes
-app.include_router(router)
+# Register routes
+app.include_router(employee_router)
 app.include_router(audit_router)
+app.include_router(analytics_router)
+app.include_router(invitation_router)
+app.include_router(reactivation_router)
+app.include_router(notification_router)
+
 
 @app.get("/")
 def home():
-    return {
-        "message": "Employee API Running"
-    }
+    return {"message": "Employee API Running"}

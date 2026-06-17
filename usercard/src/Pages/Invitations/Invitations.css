@@ -1,0 +1,255 @@
+.invitations-page {
+    padding: 28px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.invitations-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.invitations-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.invite-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.invite-btn:hover {
+    background: #1d4ed8;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.invite-modal {
+    background: white;
+    border-radius: 16px;
+    padding: 28px;
+    width: 420px;
+}
+
+.invite-modal h3 {
+    margin: 0 0 20px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+    margin-bottom: 6px;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.form-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.cancel-btn {
+    padding: 9px 18px;
+    border: 1.5px solid #e5e7eb;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.submit-btn {
+    padding: 9px 18px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 20px;
+    background: #f3f4f6;
+    padding: 4px;
+    border-radius: 10px;
+    width: fit-content;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.tab.active {
+    background: white;
+    color: #111827;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.data-table th {
+    text-align: left;
+    padding: 12px 14px;
+    background: #f9fafb;
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.data-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #111827;
+}
+
+.data-table tr:hover td {
+    background: #fafafa;
+}
+
+.badge {
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.badge.admin {
+    background: #ede9fe;
+    color: #7c3aed;
+}
+
+.badge.user {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.badge.status-active {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.badge.status-inactive {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.badge.status-pending {
+    background: #fef9c3;
+    color: #a16207;
+}
+
+.badge.status-revoked {
+    background: #f3f4f6;
+    color: #9ca3af;
+}
+
+.badge.status-accepted {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.copy-link-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.revoke-btn {
+    padding: 6px 10px;
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.deactivate-btn {
+    padding: 6px 12px;
+    background: #fef2f2;
+    color: #ef4444;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.deactivated-label {
+    font-size: 12px;
+    color: #9ca3af;
+    font-style: italic;
+}
+
+.empty-row {
+    text-align: center;
+    color: #9ca3af;
+    padding: 32px;
+}

@@ -10,14 +10,50 @@ from app.controllers.employee_controller import (
     import_users
 )
 
+from app.services.role_request_service import (
+    create_role_request,
+    get_role_requests,
+    approve_role_request,
+    reject_role_request
+)
+
+
 router = APIRouter()
+
+@router.post("/role-requests")
+def submit_role_request(data: dict):
+    return {
+        "success": True,
+        "data": create_role_request(data)
+    }
+
+@router.get("/role-requests")
+def fetch_role_requests():
+    return {
+        "success": True,
+        "data": get_role_requests()
+    }
+
+@router.put("/role-requests/{request_id}/approve")
+def approve_request(request_id: int):
+    return {
+        "success": True,
+        "data": approve_role_request(request_id)
+    }
+
+@router.put("/role-requests/{request_id}/reject")
+def reject_request(request_id: int):
+    return {
+        "success": True,
+        "data": reject_role_request(request_id)
+    }
 
 
 @router.get("/audit-logs")
-def fetch_logs():
+def fetch_logs(company_id: int = None):
     return {
         "success": True,
-        "data": get_audit_logs()
+        "data": get_audit_logs(company_id),
     }
 
 
@@ -27,81 +63,53 @@ def import_employee_data():
 
 
 @router.get("/employees")
-def fetch_employees(
-    company_id: int = 1
-):
+def fetch_employees(company_id: int = 1, search: str = None, role: str = None, department: str = None, page: int = 1, limit: int = 50):
+    employees = fetch_all_employees(company_id)
+
+    if search:
+        employees = [e for e in employees if search.lower() in e["name"].lower()]
+    if role:
+        employees = [e for e in employees if e["role"] == role]
+    if department:
+        employees = [e for e in employees if e["department"] == department]
+
+    total = len(employees)
+    start = (page - 1) * limit
+    paginated = employees[start: start + limit]
+
     return {
         "success": True,
-        "data": fetch_all_employees(
-            company_id
-        )
+        "data": paginated,
+        "total": total,
+        "page": page,
+        "limit": limit,
     }
+
 
 @router.get("/employees/{employee_id}")
 def fetch_employee(employee_id: int):
-
     employee = fetch_employee_by_id(employee_id)
-
     if not employee:
-        raise HTTPException(
-            status_code=404,
-            detail="Employee not found"
-        )
-
-    return {
-        "success": True,
-        "data": employee
-    }
+        raise HTTPException(status_code=404, detail="Employee not found")
+    return {"success": True, "data": employee}
 
 
 @router.post("/employees")
-def add_employee_route(
-    employee: dict
-):
-    print("Received Employee:", employee)
+def add_employee_route(employee: dict):
+    return {"success": True, "data": create_employee(employee)}
 
-    return {
-        "success": True,
-        "data": create_employee(employee)
-    }
 
 @router.put("/employees/{employee_id}")
-def update_employee_route(
-    employee_id: int,
-    employee: dict
-):
-
-    updated = edit_employee(
-        employee_id,
-        employee
-    )
-
+def update_employee_route(employee_id: int, employee: dict):
+    updated = edit_employee(employee_id, employee)
     if not updated:
-        raise HTTPException(
-            status_code=404,
-            detail="Employee not found"
-        )
-
-    return {
-        "success": True,
-        "data": updated
-    }
+        raise HTTPException(status_code=404, detail="Employee not found")
+    return {"success": True, "data": updated}
 
 
 @router.delete("/employees/{employee_id}")
-def delete_employee_route(
-    employee_id: int
-):
-
+def delete_employee_route(employee_id: int):
     deleted = remove_employee(employee_id)
-
     if not deleted:
-        raise HTTPException(
-            status_code=404,
-            detail="Employee not found"
-        )
-
-    return {
-        "success": True,
-        "message": "Employee deleted"
-    }
+        raise HTTPException(status_code=404, detail="Employee not found")
+    return {"success": True, "message": "Employee deleted"}
