@@ -1,0 +1,135 @@
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Sidebar pakkana unna content */
+.main-section {
+  flex: 1;
+  margin-left: 260px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.page-content {
+  flex: 1;
+  padding: 25px;
+  transition: all 0.3s ease;
+}
+
+/* ================= LIGHT THEME ================= */
+
+body.light-theme {
+  background: #f4f7fe;
+  color: #1e293b;
+}
+
+body.light-theme .main-section,
+body.light-theme .page-content {
+  background: #f4f7fe;
+}
+
+body.light-theme .table-card,
+body.light-theme .settings-card,
+body.light-theme .request-card,
+body.light-theme .attendance-card,
+/* body.light-theme .modal-content, */
+body.light-theme .employee-card,
+body.light-theme .department-card,
+body.light-theme .dashboard-card {
+  background: #ffffff;
+  color: #1e293b;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* ================= DARK THEME ================= */
+
+body.dark-theme {
+  background: #111827;
+  color: #f8fafc;
+}
+
+body.dark-theme .main-section,
+body.dark-theme .page-content {
+  background: #111827;
+}
+
+body.dark-theme .table-card,
+body.dark-theme .settings-card,
+body.dark-theme .request-card,
+body.dark-theme .attendance-card,
+/* body.dark-theme .modal-content, */
+body.dark-theme .employee-card,
+body.dark-theme .department-card,
+body.dark-theme .dashboard-card {
+  background: #1f2937;
+  color: #f8fafc;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Tables */
+
+body.dark-theme table {
+  color: white;
+}
+
+body.dark-theme th {
+  background: #374151;
+  color: white;
+}
+
+body.dark-theme td {
+  border-color: #4b5563;
+}
+
+/* Inputs */
+
+body.dark-theme input,
+body.dark-theme select,
+body.dark-theme textarea {
+  background: #374151;
+  color: white;
+  border: 1px solid #4b5563;
+}
+
+body.dark-theme input::placeholder,
+body.dark-theme textarea::placeholder {
+  color: #d1d5db;
+}
+
+/* Buttons */
+
+body.dark-theme .edit-btn {
+  background: #2563eb;
+  color: white;
+}
+
+body.dark-theme .delete-btn {
+  background: #dc2626;
+  color: white;
+}
+
+/* Smooth Transition */
+
+body,
+.main-section,
+.page-content,
+.table-card,
+.settings-card,
+.request-card,
+.attendance-card,
+.modal-content,
+.employee-card,
+.department-card,
+.dashboard-card,
+button,
+input,
+select,
+textarea,
+table,
+th,
+td {
+  transition: all 0.3s ease;
+}
