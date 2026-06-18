@@ -12,6 +12,56 @@
   transition: all 0.3s ease;
 }
 
+.theme-btn {
+  border: none;
+  background: transparent;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.profile {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.profile-icon {
+  font-size: 34px;
+  color: #2563eb;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  min-width: 55px;
+  /* background: white; */
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+  padding: 8px;
+  z-index: 999;
+}
+
+.profile-dropdown button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 10px;
+  cursor: pointer;
+  background: red;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  border-radius: 6px;
+}
+
+.profile-dropdown button:hover {
+  background: #d31f04;
+}
+
 .navbar-left {
   display: flex;
   align-items: center;

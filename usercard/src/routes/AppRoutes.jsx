@@ -21,7 +21,7 @@ import ReactivationRequests from "../Pages/ReactivationRequests/ReactivationRequ
 
 import ProtectedRoute from "../Components/ProtectedRoute/ProtectedRoute";
 
-function AppRoutes({ darkMode, setDarkMode }) {
+function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapsed }) {
   return (
     <BrowserRouter>
       <Routes>
@@ -36,8 +36,12 @@ function AppRoutes({ darkMode, setDarkMode }) {
         <Route
           element={
             <ProtectedRoute allowedRoles={["admin", "user"]}>
-              <DashboardLayout darkMode={darkMode} setDarkMode={setDarkMode} />
-            </ProtectedRoute>
+              <DashboardLayout
+                darkMode={darkMode}
+                setDarkMode={setDarkMode}
+                sidebarCollapsed={sidebarCollapsed}
+                setSidebarCollapsed={setSidebarCollapsed}
+              />            </ProtectedRoute>
           }
         >
           <Route path="/dashboard" element={<Dashboard />} />

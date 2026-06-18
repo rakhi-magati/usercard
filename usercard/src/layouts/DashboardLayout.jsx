@@ -6,21 +6,28 @@ import "./DashboardLayout.css";
 function DashboardLayout({
   darkMode,
   setDarkMode,
+  sidebarCollapsed,
+  setSidebarCollapsed,
 }) {
+
   return (
     <div
-      className={`dashboard-layout ${
-        darkMode
+      className={`dashboard-layout ${darkMode
           ? "dark-mode"
           : "light-mode"
-      }`}
+        }`}
     >
-      <Sidebar />
+      <Sidebar
+         sidebarCollapsed={sidebarCollapsed}
+      
+      />
 
       <div className="main-section">
         <Navbar
           darkMode={darkMode}
           setDarkMode={setDarkMode}
+          sidebarCollapsed={sidebarCollapsed}
+          setSidebarCollapsed={setSidebarCollapsed}
         />
 
         <div className="page-content">

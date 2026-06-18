@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import AppRotes from "./Routes/AppRoutes";
+import AppRoutes from "./routes/AppRoutes";
 function App() {
+
+
+  const [sidebarCollapsed, setSidebarCollapsed] =
+    useState(false);
 
   const [darkMode, setDarkMode] =
     useState(
@@ -45,9 +48,11 @@ function App() {
   }, [darkMode]);
 
   return (
-    <AppRotes
+    <AppRoutes
       darkMode={darkMode}
       setDarkMode={setDarkMode}
+      sidebarCollapsed={sidebarCollapsed}
+      setSidebarCollapsed={setSidebarCollapsed}
     />
   );
 }

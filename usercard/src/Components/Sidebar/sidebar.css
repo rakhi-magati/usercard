@@ -176,3 +176,30 @@ body.dark-theme .sidebar a.active {
   box-shadow: 0 8px 18px
     rgba(239, 68, 68, 0.4);
 }
+.sidebar.collapsed {
+  width: 80px;
+}
+
+.sidebar.collapsed .user-role {
+  display: none;
+}
+
+.sidebar.collapsed .logo {
+  text-align: center;
+}
+
+.sidebar-nav a,
+.logout-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sidebar.collapsed a,
+.sidebar.collapsed .logout-btn {
+  justify-content: center;
+}
+
+.sidebar.collapsed span {
+  display: none;
+}

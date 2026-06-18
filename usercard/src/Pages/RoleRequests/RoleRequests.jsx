@@ -91,7 +91,7 @@ function RoleRequests() {
   };
 
   return (
-    <div className="role-requests-page">
+    <div className="role-requests-page dark-mode">
 
       <h2>
         Role Change Requests

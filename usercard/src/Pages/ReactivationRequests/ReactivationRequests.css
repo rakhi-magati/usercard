@@ -31,7 +31,7 @@
 }
 
 .empty-state {
-    background: #f9fafb;
+    /* background: #f9fafb; */
     border-radius: 12px;
     padding: 40px;
     text-align: center;

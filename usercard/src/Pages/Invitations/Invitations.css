@@ -253,3 +253,124 @@
     color: #9ca3af;
     padding: 32px;
 }
+
+
+/* ===========================
+   DARK MODE SUPPORT
+=========================== */
+
+.dark .invitations-page {
+  background: #111827;
+}
+
+.dark .invitations-header h1 {
+  color: #f9fafb;
+}
+
+.dark .tabs {
+  background: #1f2937;
+}
+
+.dark .tab {
+  color: #d1d5db;
+}
+
+.dark .tab.active {
+  background: #374151;
+  color: #ffffff;
+}
+
+.dark .members-table-wrap,
+.dark .invitations-table-wrap {
+  background: #1f2937;
+  border-radius: 10px;
+}
+
+.dark .data-table {
+  background: #1f2937;
+}
+
+.dark .data-table th {
+  background: #111827;
+  color: #f3f4f6;
+}
+
+.dark .data-table td {
+  color: #e5e7eb;
+  border-bottom: 1px solid #374151;
+}
+
+/* HOVER FIX */
+.dark .data-table tbody tr:hover {
+  background: #374151;
+}
+
+.dark .data-table tbody tr:hover td {
+  background: #374151 !important;
+  color: #ffffff !important;
+}
+
+/* Modal */
+
+.dark .invite-modal {
+  background: #1f2937;
+  color: white;
+}
+
+.dark .invite-modal h3 {
+  color: white;
+}
+
+.dark .form-group label {
+  color: #d1d5db;
+}
+
+.dark .form-group input,
+.dark .form-group select {
+  background: #374151;
+  color: white;
+  border: 1px solid #4b5563;
+}
+
+.dark .cancel-btn {
+  background: #374151;
+  color: white;
+  border-color: #4b5563;
+}
+
+.dark .empty-row {
+  color: #d1d5db;
+}
+
+
+.dark-theme .data-table {
+  background: #1f2937;
+}
+
+.dark-theme .data-table th {
+  background: #111827;
+  color: white;
+}
+
+.dark-theme .data-table td {
+  background: #1f2937;
+  color: #e5e7eb;
+}
+
+.dark-theme .data-table tbody tr:hover td {
+  background: #374151 !important;
+  color: #ffffff !important;
+}
+
+.dark-theme .invitations-header h1 {
+  color: white;
+}
+
+.dark-theme .tabs {
+  background: #1f2937;
+}
+
+.dark-theme .tab.active {
+  background: #374151;
+  color: white;
+}
