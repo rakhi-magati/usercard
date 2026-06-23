@@ -105,3 +105,57 @@ export const markAllNotificationsRead = async (companyId = 1) => {
 };
 
 
+
+// Attendance
+export const getAttendance = async ({ companyId = 1, attendanceDate, search = "", page = 1, limit = 8 }) => {
+  const response = await axios.get(`${API}/attendance/`, {
+    params: {
+      company_id: companyId,
+      attendance_date: attendanceDate,
+      search,
+      page,
+      limit,
+    },
+  });
+  return response.data;
+};
+
+export const downloadAttendanceReport = async ({ companyId = 1, attendanceDate, search = "" }) => {
+  const response = await axios.get(`${API}/attendance/download`, {
+    params: {
+      company_id: companyId,
+      attendance_date: attendanceDate,
+      search,
+    },
+    responseType: "blob",
+  });
+  return response.data;
+};
+
+export const getMyAttendance = async ({ companyId = 1, email }) => {
+  const response = await axios.get(`${API}/attendance/mine`, {
+    params: {
+      company_id: companyId,
+      email,
+    },
+  });
+  return response.data.data;
+};
+
+export const checkInAttendance = async ({ companyId = 1, email, date }) => {
+  const response = await axios.post(`${API}/attendance/check-in`, {
+    company_id: companyId,
+    email,
+    date,
+  });
+  return response.data.data;
+};
+
+export const checkOutAttendance = async ({ companyId = 1, email, date }) => {
+  const response = await axios.post(`${API}/attendance/check-out`, {
+    company_id: companyId,
+    email,
+    date,
+  });
+  return response.data.data;
+};

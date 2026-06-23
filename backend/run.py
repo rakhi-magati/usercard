@@ -11,6 +11,7 @@ from app.models.invitation_model import Invitation
 from app.models.reactivation_model import ReactivationRequest
 from app.models.notification_model import Notification
 from app.models.department_transfer_model import DepartmentTransferHistory
+from app.models.attendance_model import AttendanceRecord
 
 # Import all routers
 from app.routes.employee_routes import router as employee_router
@@ -19,6 +20,7 @@ from app.routes.analytics_routes import router as analytics_router
 from app.routes.invitation_routes import router as invitation_router
 from app.routes.reactivation_routes import router as reactivation_router
 from app.routes.notification_routes import router as notification_router
+from app.routes.attendance_routes import router as attendance_router
 
 app = FastAPI()
 
@@ -41,6 +43,7 @@ app.include_router(analytics_router)
 app.include_router(invitation_router)
 app.include_router(reactivation_router)
 app.include_router(notification_router)
+app.include_router(attendance_router)
 
 
 @app.get("/")

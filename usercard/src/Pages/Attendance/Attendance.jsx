@@ -1,5 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { FaCalendarAlt, FaDownload, FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
+import {
+  checkInAttendance,
+  checkOutAttendance,
+  downloadAttendanceReport,
+  getAttendance,
+  getMyAttendance,
+} from "../../services/employeeService";
 import "./Attendance.css";
 
 const formatDate = (date = new Date()) => date.toISOString().split("T")[0];
@@ -33,35 +40,10 @@ const notify = (companyId, notification) => {
 };
 
 const getRequestKey = (companyId) => `attendance_access_requests_${companyId}`;
-const getAttendanceKey = (companyId) => `attendance_records_${companyId}`;
 const getLeaveKey = (companyId) => `leave_requests_${companyId}`;
+const rowsPerPage = 8;
 
-const defaultRecords = [
-  { id: 1, name: "Rakesh", email: "rakesh@example.com", department: "IT", date: "2026-06-11", status: "Late", checkIn: "2026-06-11 09:38:19", checkOut: "2026-06-11 09:38:23" },
-  { id: 2, name: "Rahul", email: "rahul@example.com", department: "HR", date: "2026-06-10", status: "Absent", checkIn: "", checkOut: "" },
-  { id: 3, name: "Kiran", email: "kiran@example.com", department: "Finance", date: "2026-06-09", status: "Present", checkIn: "", checkOut: "" },
-  { id: 4, name: "Suresh", email: "suresh@example.com", department: "Sales", date: "2026-06-08", status: "Present", checkIn: "", checkOut: "" },
-  { id: 5, name: "Mohammad Muzafar", email: "mohammad@example.com", department: "General Department", date: "2026-06-07", status: "Late", checkIn: "", checkOut: "" },
-  { id: 6, name: "Mohammad Muzafar", email: "mohammad@example.com", department: "General Department", date: "2026-06-06", status: "Present", checkIn: "", checkOut: "" },
-  { id: 7, name: "Mohammad Muzafar", email: "mohammad@example.com", department: "General Department", date: "2026-06-05", status: "Present", checkIn: "", checkOut: "" },
-];
-
-const adminRecords = [
-  { id: "admin-1", name: "Leanne Graham", email: "Sincere@april.biz", department: "Marketing", date: "2026-06-22", status: "On Leave", checkIn: "", checkOut: "", hours: "" },
-  { id: "admin-2", name: "Ervin Howell", email: "Shanna@melissa.tv", department: "Data", date: "2026-06-22", status: "Active", checkIn: "09:25 AM", checkOut: "05:20 PM", hours: "9.0 hrs" },
-  { id: "admin-3", name: "Clementine Bauch", email: "Nathan@yesenia.net", department: "Product", date: "2026-06-22", status: "Active", checkIn: "09:03 AM", checkOut: "05:31 PM", hours: "8.5 hrs" },
-  { id: "admin-4", name: "Patricia Lebsack", email: "Julianne.OConner@kory.org", department: "Human Resources", date: "2026-06-22", status: "Active", checkIn: "09:59 AM", checkOut: "05:34 PM", hours: "7.5 hrs" },
-  { id: "admin-5", name: "Chelsey Dietrich", email: "Lucio_Hettinger@annie.ca", department: "Design", date: "2026-06-22", status: "Remote", checkIn: "", checkOut: "", hours: "" },
-  { id: "admin-6", name: "Mrs. Dennis Schulist", email: "Karley.Dach@jasper.info", department: "digital marketing", date: "2026-06-22", status: "Active", checkIn: "10:29 AM", checkOut: "05:31 PM", hours: "8.0 hrs" },
-  { id: "admin-7", name: "Kurtis Weissnat", email: "Telly.Hoeger@billy.biz", department: "digital marketing", date: "2026-06-22", status: "Inactive", checkIn: "", checkOut: "", hours: "" },
-  { id: "admin-8", name: "Nicholas Runolfsdottir V", email: "Sherwood@rosamond.me", department: "AI analyst", date: "2026-06-22", status: "Active", checkIn: "09:25 AM", checkOut: "06:15 PM", hours: "8.0 hrs" },
-  { id: "admin-9", name: "Glenna Reichert", email: "Chaim_McDermott@dana.io", department: "Operations", date: "2026-06-22", status: "On Leave", checkIn: "", checkOut: "", hours: "" },
-  { id: "admin-10", name: "Clementina DuBuque", email: "Rey.Padberg@karina.biz", department: "Finance", date: "2026-06-22", status: "Remote", checkIn: "08:54 AM", checkOut: "05:05 PM", hours: "8.0 hrs" },
-  { id: "admin-11", name: "Antonette Abernathy", email: "Antonette@april.biz", department: "Sales", date: "2026-06-22", status: "Inactive", checkIn: "", checkOut: "", hours: "" },
-  { id: "admin-12", name: "Maxime Nolan", email: "maxime@nolan.example", department: "Engineering", date: "2026-06-22", status: "Active", checkIn: "09:15 AM", checkOut: "05:46 PM", hours: "8.5 hrs" },
-];
-
-const normalizeStatus = (status) => status.toLowerCase().replace(/\s+/g, "-");
+const normalizeStatus = (status = "") => status.toLowerCase().replace(/\s+/g, "-");
 
 function Attendance() {
   const role = localStorage.getItem("role")?.toLowerCase() || "user";
@@ -71,12 +53,17 @@ function Attendance() {
   const userDepartment = localStorage.getItem("department") || "General Department";
 
   const [accessRequests, setAccessRequests] = useState(() => readJson(getRequestKey(companyId), []));
-  const [records, setRecords] = useState(() => readJson(getAttendanceKey(companyId), defaultRecords));
+  const [records, setRecords] = useState([]);
   const [leaveRequests, setLeaveRequests] = useState(() => readJson(getLeaveKey(companyId), []));
   const [leaveForm, setLeaveForm] = useState({ type: "Vacation", startDate: "", endDate: "", reason: "" });
   const [adminSearch, setAdminSearch] = useState("");
-  const [adminDate, setAdminDate] = useState("2026-06-22");
+  const [adminDate, setAdminDate] = useState(formatDate());
   const [adminPage, setAdminPage] = useState(1);
+  const [adminRows, setAdminRows] = useState([]);
+  const [adminTotal, setAdminTotal] = useState(0);
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminError, setAdminError] = useState("");
+  const [userError, setUserError] = useState("");
 
   const myAccessRequest = accessRequests.find((request) => request.email === userEmail);
   const accessStatus = myAccessRequest?.status || "pending";
@@ -85,15 +72,10 @@ function Attendance() {
   const todayRecord = myRecords.find((record) => record.date === today);
   const hasCheckedIn = Boolean(todayRecord?.checkIn);
   const hasCheckedOut = Boolean(todayRecord?.checkOut);
-  const rowsPerPage = 8;
 
   useEffect(() => {
     writeJson(getRequestKey(companyId), accessRequests);
   }, [accessRequests, companyId]);
-
-  useEffect(() => {
-    writeJson(getAttendanceKey(companyId), records);
-  }, [records, companyId]);
 
   useEffect(() => {
     writeJson(getLeaveKey(companyId), leaveRequests);
@@ -122,37 +104,51 @@ function Attendance() {
     });
   }, [companyId, myAccessRequest, role, userEmail, userName]);
 
-  const adminRows = useMemo(() => {
-    const localRows = records
-      .filter((record) => record.date === adminDate)
-      .map((record) => ({
-        ...record,
-        status: record.status === "Present" ? "Active" : record.status,
-        hours: record.checkIn && record.checkOut ? "8.0 hrs" : "",
-      }));
-    const merged = [...adminRecords, ...localRows];
-    const seen = new Set();
-    return merged
-      .filter((record) => {
-        const key = `${record.email}-${record.date}`;
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      })
-      .filter((record) => record.date === adminDate)
-      .filter((record) => {
-        const query = adminSearch.trim().toLowerCase();
-        if (!query) return true;
-        return (
-          record.name.toLowerCase().includes(query) ||
-          record.department.toLowerCase().includes(query) ||
-          record.email.toLowerCase().includes(query)
-        );
-      });
-  }, [adminDate, adminSearch, records]);
+  useEffect(() => {
+    if (role === "admin") return;
 
-  const adminTotalPages = Math.max(1, Math.ceil(adminRows.length / rowsPerPage));
-  const adminPageRows = adminRows.slice((adminPage - 1) * rowsPerPage, adminPage * rowsPerPage);
+    const fetchMyAttendance = async () => {
+      setUserError("");
+      try {
+        const data = await getMyAttendance({ companyId, email: userEmail });
+        setRecords(Array.isArray(data) ? data : []);
+      } catch {
+        setRecords([]);
+      }
+    };
+
+    fetchMyAttendance();
+  }, [companyId, role, userEmail]);
+
+  useEffect(() => {
+    if (role !== "admin") return;
+
+    const fetchAdminAttendance = async () => {
+      setAdminLoading(true);
+      setAdminError("");
+      try {
+        const response = await getAttendance({
+          companyId,
+          attendanceDate: adminDate,
+          search: adminSearch,
+          page: adminPage,
+          limit: rowsPerPage,
+        });
+        setAdminRows(Array.isArray(response.data) ? response.data : []);
+        setAdminTotal(response.total || 0);
+      } catch {
+        setAdminRows([]);
+        setAdminTotal(0);
+        setAdminError("Failed to load attendance from API.");
+      } finally {
+        setAdminLoading(false);
+      }
+    };
+
+    fetchAdminAttendance();
+  }, [adminDate, adminPage, adminSearch, companyId, role]);
+
+  const adminTotalPages = Math.max(1, Math.ceil(adminTotal / rowsPerPage));
   const adminCounts = adminRows.reduce(
     (counts, record) => ({ ...counts, [record.status]: (counts[record.status] || 0) + 1 }),
     {}
@@ -162,43 +158,28 @@ function Attendance() {
     setAdminPage(1);
   }, [adminDate, adminSearch]);
 
-  const markAttendance = (action) => {
+  const markAttendance = async (action) => {
     if (action === "checkIn" && hasCheckedIn) return;
     if (action === "checkOut" && (!hasCheckedIn || hasCheckedOut)) return;
 
-    const now = new Date();
-    const stamp = now.toLocaleString();
-    const status = action === "checkIn" ? "Present" : todayRecord?.status || "Present";
+    setUserError("");
+    try {
+      const updated = action === "checkIn"
+        ? await checkInAttendance({ companyId, email: userEmail, date: today })
+        : await checkOutAttendance({ companyId, email: userEmail, date: today });
 
-    if (todayRecord) {
-      setRecords((prev) =>
-        prev.map((record) =>
-          record.id === todayRecord.id
-            ? {
-                ...record,
-                status,
-                checkIn: action === "checkIn" ? stamp : record.checkIn,
-                checkOut: action === "checkOut" ? stamp : record.checkOut,
-              }
-            : record
-        )
-      );
-      return;
+      setRecords((prev) => {
+        const exists = prev.some((record) => record.date === updated.date && record.email === updated.email);
+        if (exists) {
+          return prev.map((record) =>
+            record.date === updated.date && record.email === updated.email ? updated : record
+          );
+        }
+        return [updated, ...prev];
+      });
+    } catch {
+      setUserError("Attendance API failed. Please confirm this user exists as an employee.");
     }
-
-    setRecords((prev) => [
-      {
-        id: Date.now(),
-        name: userName,
-        email: userEmail,
-        department: userDepartment,
-        date: today,
-        status: "Present",
-        checkIn: action === "checkIn" ? stamp : "",
-        checkOut: action === "checkOut" ? stamp : "",
-      },
-      ...prev,
-    ]);
   };
 
   const submitLeave = (event) => {
@@ -226,26 +207,19 @@ function Attendance() {
     setLeaveForm({ type: "Vacation", startDate: "", endDate: "", reason: "" });
   };
 
-  const downloadCSV = () => {
-    const headers = ["Employee", "Email", "Department", "Date", "Status", "Check In", "Check Out", "Hours"];
-    const rows = adminRows.map((record) => [
-      record.name,
-      record.email,
-      record.department,
-      record.date,
-      record.status,
-      record.checkIn || "-",
-      record.checkOut || "-",
-      record.hours || "-",
-    ]);
-    const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `attendance-report-${adminDate}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const downloadCSV = async () => {
+    try {
+      const blob = await downloadAttendanceReport({ companyId, attendanceDate: adminDate, search: adminSearch });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `attendance-report-${adminDate}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch {
+      setAdminError("Failed to download attendance report from API.");
+    }
   };
 
   const renderStatus = (status) => (
@@ -281,6 +255,8 @@ function Attendance() {
           </div>
         </div>
 
+        {adminError && <div className="attendance-api-error">{adminError}</div>}
+
         <section className="admin-attendance-card">
           <div className="attendance-table-wrap">
             <table className="admin-attendance-table">
@@ -296,25 +272,31 @@ function Attendance() {
                 </tr>
               </thead>
               <tbody>
-                {adminPageRows.map((record) => (
-                  <tr key={record.id}>
-                    <td>
-                      <div className="admin-employee-cell">
-                        <span className="admin-avatar">{record.name.charAt(0)}</span>
-                        <span>
-                          <strong>{record.name}</strong>
-                          <small>{record.email}</small>
-                        </span>
-                      </div>
-                    </td>
-                    <td>{record.department}</td>
-                    <td>{record.date}</td>
-                    <td>{renderStatus(record.status)}</td>
-                    <td>{record.checkIn || "-"}</td>
-                    <td>{record.checkOut || "-"}</td>
-                    <td>{record.hours || "-"}</td>
-                  </tr>
-                ))}
+                {adminLoading ? (
+                  <tr><td colSpan="7">Loading attendance...</td></tr>
+                ) : adminRows.length > 0 ? (
+                  adminRows.map((record) => (
+                    <tr key={`${record.employee_id}-${record.date}`}>
+                      <td>
+                        <div className="admin-employee-cell">
+                          <span className="admin-avatar">{record.name.charAt(0)}</span>
+                          <span>
+                            <strong>{record.name}</strong>
+                            <small>{record.email}</small>
+                          </span>
+                        </div>
+                      </td>
+                      <td>{record.department}</td>
+                      <td>{record.date}</td>
+                      <td>{renderStatus(record.status)}</td>
+                      <td>{record.checkIn || "-"}</td>
+                      <td>{record.checkOut || "-"}</td>
+                      <td>{record.hours || "-"}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr><td colSpan="7">No attendance records found from API.</td></tr>
+                )}
               </tbody>
             </table>
           </div>
@@ -336,12 +318,11 @@ function Attendance() {
 
         <div className="admin-attendance-footer">
           <div className="admin-attendance-legend">
-            <span><i className="dot active" /> Present: {adminCounts.Active || 0}</span>
-            <span><i className="dot leave" /> On Leave: {adminCounts["On Leave"] || 0}</span>
-            <span><i className="dot remote" /> Remote: {adminCounts.Remote || 0}</span>
+            <span><i className="dot active" /> Active: {adminCounts.Active || 0}</span>
             <span><i className="dot inactive" /> Inactive: {adminCounts.Inactive || 0}</span>
+            <span><i className="dot active" /> Present: {adminCounts.Present || 0}</span>
           </div>
-          <p>Last updated: 1:37:11 pm · Total employees: {adminRows.length}</p>
+          <p>Loaded from API - Total employees: {adminTotal}</p>
         </div>
       </div>
     );
@@ -382,9 +363,10 @@ function Attendance() {
       <div className="attendance-grid two-columns">
         <section className="attendance-panel">
           <h3><FaCalendarAlt /> Today's Attendance</h3>
-          <p className="muted-line">{userName} · {userDepartment}</p>
-          <div className="wide-status">{renderStatus(todayRecord?.status || "Present")}</div>
+          <p className="muted-line">{userName} - {userDepartment}</p>
+          <div className="wide-status">{renderStatus(todayRecord?.status || "Not Checked In")}</div>
           <p className="muted-line">{todayRecord?.checkIn ? `Checked in ${todayRecord.checkIn}` : "Not checked in"}</p>
+          {userError && <div className="attendance-api-error">{userError}</div>}
           <div className="attendance-button-row">
             <button className="attendance-primary" onClick={() => markAttendance("checkIn")} disabled={hasCheckedIn}>
               <FaSignInAlt /> Check In
@@ -429,12 +411,13 @@ function Attendance() {
         <div className="attendance-table-wrap">
           <table className="attendance-table">
             <thead>
-              <tr><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th></tr>
+              <tr><th>Date</th><th>Status</th><th>Check In</th><th>Check Out</th><th>Hours</th></tr>
             </thead>
             <tbody>
               {myRecords.map((record) => (
-                <tr key={record.id}><td>{record.date}</td><td>{renderStatus(record.status)}</td><td>{record.checkIn || "-"}</td><td>{record.checkOut || "-"}</td></tr>
+                <tr key={record.id}><td>{record.date}</td><td>{renderStatus(record.status)}</td><td>{record.checkIn || "-"}</td><td>{record.checkOut || "-"}</td><td>{record.hours || "-"}</td></tr>
               ))}
+              {myRecords.length === 0 && <tr><td colSpan="5">No attendance history found.</td></tr>}
             </tbody>
           </table>
         </div>
@@ -460,6 +443,3 @@ function Attendance() {
 }
 
 export default Attendance;
-
-
-

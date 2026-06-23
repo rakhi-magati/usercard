@@ -616,3 +616,14 @@ body.dark-mode .admin-date-control label {
 
 
 
+
+.attendance-api-error {
+  background: #ffe1e1;
+  border: 1px solid #ff9a9a;
+  border-radius: 7px;
+  color: #dc2626;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding: 12px 14px;
+}
