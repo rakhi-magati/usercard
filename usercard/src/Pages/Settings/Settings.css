@@ -156,3 +156,237 @@ body.dark-theme .request-card {
   background: #1f2937;
   color: white;
 }
+.admin-settings-page {
+  background: #f3f4f6;
+  min-height: 100%;
+  padding: 18px 16px 70px;
+}
+
+.admin-settings-header h1 {
+  font-size: 30px;
+  line-height: 1.2;
+  margin: 0 0 14px;
+}
+
+.admin-settings-header p {
+  color: #475569;
+  font-size: 14px;
+  margin: 0 0 28px;
+}
+
+.admin-settings-shell {
+  background: #fff;
+  border: 1px solid #d8e0ea;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  min-height: 520px;
+  overflow: hidden;
+}
+
+.settings-tabs {
+  background: #f8fafc;
+  border-right: 1px solid #d8e0ea;
+  padding: 28px 20px;
+}
+
+.settings-tabs button {
+  align-items: center;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  font-size: 15px;
+  font-weight: 700;
+  gap: 12px;
+  min-height: 38px;
+  padding: 0 12px;
+  text-align: left;
+  width: 100%;
+}
+
+.settings-tabs button + button {
+  margin-top: 12px;
+}
+
+.settings-tabs button span {
+  align-items: center;
+  color: inherit;
+  display: inline-flex;
+  font-size: 14px;
+  font-weight: 900;
+  justify-content: center;
+  width: 18px;
+}
+
+.settings-tabs button.active {
+  background: #e8f0ff;
+  color: #2563eb;
+}
+
+.settings-main-panel {
+  padding: 34px 40px;
+}
+
+.settings-content-section h2,
+.approval-section h2 {
+  color: #020617;
+  font-size: 24px;
+  line-height: 1.2;
+  margin: 0 0 14px;
+}
+
+.settings-content-section p,
+.approval-section p {
+  color: #334e68;
+  font-size: 14px;
+  margin: 0;
+}
+
+.approval-section {
+  margin-bottom: 42px;
+}
+
+.approval-section:last-child {
+  margin-bottom: 0;
+}
+
+.settings-empty-state {
+  color: #475569 !important;
+  font-size: 16px !important;
+  margin: 48px 0 0 !important;
+  text-align: center;
+}
+
+.approval-item {
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 16px 18px;
+}
+
+.approval-item strong,
+.approval-item span,
+.approval-item small {
+  display: block;
+}
+
+.approval-item strong {
+  color: #0f172a;
+  font-size: 15px;
+  margin-bottom: 6px;
+}
+
+.approval-item span,
+.approval-item small {
+  color: #64748b;
+  font-size: 13px;
+}
+
+.approval-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.approval-actions button {
+  background: #16a34a;
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.approval-actions button.reject {
+  background: #dc2626;
+}
+
+.compact-settings-section {
+  max-width: 640px;
+}
+
+.settings-profile-row {
+  margin-top: 24px;
+}
+
+.security-note {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #475569;
+  margin-top: 24px;
+  padding: 14px 16px;
+}
+
+.admin-setting-footer {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+body.dark-theme .admin-settings-page,
+body.dark-mode .admin-settings-page {
+  background: #111827;
+}
+
+body.dark-theme .admin-settings-shell,
+body.dark-mode .admin-settings-shell,
+body.dark-theme .settings-tabs,
+body.dark-mode .settings-tabs,
+body.dark-theme .security-note,
+body.dark-mode .security-note,
+body.dark-theme .admin-setting-footer,
+body.dark-mode .admin-setting-footer,
+body.dark-theme .approval-item,
+body.dark-mode .approval-item {
+  background: #1f2937;
+  border-color: #334155;
+}
+
+body.dark-theme .settings-content-section h2,
+body.dark-mode .settings-content-section h2,
+body.dark-theme .approval-section h2,
+body.dark-mode .approval-section h2,
+body.dark-theme .approval-item strong,
+body.dark-mode .approval-item strong {
+  color: #f8fafc;
+}
+
+@media (max-width: 800px) {
+  .admin-settings-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-tabs {
+    border-right: none;
+    border-bottom: 1px solid #d8e0ea;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px;
+  }
+
+  .settings-tabs button,
+  .settings-tabs button + button {
+    margin-top: 0;
+    width: auto;
+  }
+
+  .settings-main-panel {
+    padding: 24px 18px;
+  }
+
+  .approval-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

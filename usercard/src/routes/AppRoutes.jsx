@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+﻿import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "../Pages/Login/Login";
 import Signup from "../Pages/Signup/Signup";
@@ -76,7 +76,7 @@ function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapse
           <Route
             path="/attendance"
             element={
-              <ProtectedRoute allowedRoles={["admin"]}>
+              <ProtectedRoute allowedRoles={["admin", "user"]}>
                 <Attendance />
               </ProtectedRoute>
             }
@@ -85,8 +85,8 @@ function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapse
           <Route
             path="/settings"
             element={
-              <ProtectedRoute allowedRoles={["user"]}>
-                <Settings />
+              <ProtectedRoute allowedRoles={["admin", "user"]}>
+                <Settings darkMode={darkMode} setDarkMode={setDarkMode} />
               </ProtectedRoute>
             }
           />
@@ -126,3 +126,6 @@ function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapse
 }
 
 export default AppRoutes;
+
+
+

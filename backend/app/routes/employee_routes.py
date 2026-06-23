@@ -7,6 +7,8 @@ from app.controllers.employee_controller import (
     create_employee,
     edit_employee,
     remove_employee,
+    transfer_department,
+    fetch_department_transfer_history,
     import_users
 )
 
@@ -86,6 +88,22 @@ def fetch_employees(company_id: int = 1, search: str = None, role: str = None, d
     }
 
 
+
+@router.put("/employees/{employee_id}/transfer")
+def transfer_employee_route(employee_id: int, transfer: dict):
+    updated = transfer_department(employee_id, transfer)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Employee not found or department missing")
+    return {"success": True, "data": updated}
+
+
+@router.get("/department-transfers")
+def fetch_department_transfers(company_id: int = None, employee_id: int = None):
+    return {
+        "success": True,
+        "data": fetch_department_transfer_history(company_id, employee_id),
+    }
+
 @router.get("/employees/{employee_id}")
 def fetch_employee(employee_id: int):
     employee = fetch_employee_by_id(employee_id)
@@ -113,3 +131,5 @@ def delete_employee_route(employee_id: int):
     if not deleted:
         raise HTTPException(status_code=404, detail="Employee not found")
     return {"success": True, "message": "Employee deleted"}
+
+

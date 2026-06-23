@@ -6,10 +6,10 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 16px;
   color: #374151;
   position: relative;
-  padding: 6px;
+  padding: 7px;
   border-radius: 8px;
   transition: background 0.2s;
 }
@@ -20,8 +20,8 @@
 
 .notif-badge {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 2px;
+  right: 1px;
   background: #ef4444;
   color: white;
   font-size: 10px;
@@ -37,11 +37,12 @@
 .notif-dropdown {
   position: absolute;
   right: 0;
-  top: 40px;
+  top: 38px;
   width: 320px;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+  border: 1px solid #e6eaf0;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
   z-index: 1000;
   overflow: hidden;
 }
@@ -56,8 +57,8 @@
 
 .notif-header h4 {
   margin: 0;
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .mark-all-btn {
@@ -65,7 +66,7 @@
   border: none;
   cursor: pointer;
   font-size: 12px;
-  color: #2563eb;
+  color: #64748b;
   font-weight: 500;
 }
 
@@ -116,6 +117,38 @@
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: #2563eb;
+  color: #64748b;
   font-size: 12px;
 }
+
+.notif-title {
+  color: #111827;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.notif-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.notif-actions button {
+  background: #16a34a;
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 8px 12px;
+}
+
+.notif-actions button.danger {
+  background: #dc2626;
+}
+
+
+
+

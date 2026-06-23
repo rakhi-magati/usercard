@@ -10,6 +10,7 @@ from app.models.audit_log_model import AuditLog
 from app.models.invitation_model import Invitation
 from app.models.reactivation_model import ReactivationRequest
 from app.models.notification_model import Notification
+from app.models.department_transfer_model import DepartmentTransferHistory
 
 # Import all routers
 from app.routes.employee_routes import router as employee_router

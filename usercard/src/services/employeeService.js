@@ -22,6 +22,15 @@ export const deleteEmployee = async (id) => {
   const response = await axios.delete(`${EMP_API}/${id}`);
   return response.data;
 };
+export const transferEmployeeDepartment = async (id, transfer) => {
+  const response = await axios.put(`${EMP_API}/${id}/transfer`, transfer);
+  return response.data.data;
+};
+
+export const getDepartmentTransferHistory = async (companyId = 1) => {
+  const response = await axios.get(`${API}/department-transfers?company_id=${companyId}`);
+  return response.data.data;
+};
 
 export const deactivateEmployee = async (id, adminName = "Admin") => {
   const response = await axios.put(`${EMP_API}/${id}/deactivate`, { admin_name: adminName });
@@ -94,3 +103,5 @@ export const markAllNotificationsRead = async (companyId = 1) => {
   const response = await axios.put(`${API}/notifications/read-all?company_id=${companyId}`);
   return response.data;
 };
+
+

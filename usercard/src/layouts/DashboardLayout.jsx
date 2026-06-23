@@ -1,6 +1,6 @@
 import { Outlet } from "react-router-dom";
 import Navbar from "../Components/Navbar/Navbar";
-import Sidebar from "../Components/SideBar/Sidebar";
+import Sidebar from "../Components/Sidebar/Sidebar";
 import "./DashboardLayout.css";
 
 function DashboardLayout({
@@ -22,7 +22,7 @@ function DashboardLayout({
       
       />
 
-      <div className="main-section">
+      <div className={`main-section ${sidebarCollapsed ? "collapsed" : ""}`}>
         <Navbar
           darkMode={darkMode}
           setDarkMode={setDarkMode}
@@ -39,3 +39,4 @@ function DashboardLayout({
 }
 
 export default DashboardLayout;
+

@@ -1,84 +1,79 @@
 import {
   FaBars,
-  FaSearch,
+  FaBuilding,
+  FaCalendarAlt,
   FaChevronDown,
   FaMoon,
   FaSun,
-  FaUserCircle,
   FaSignOutAlt,
+  FaUsers,
 } from "react-icons/fa";
+import { NavLink } from "react-router-dom";
 import NotificationBell from "../NotificationBell/NotificationBell";
 import "./Navbar.css";
 import { useState } from "react";
 
-function Navbar({ darkMode,
+function Navbar({
+  darkMode,
   setDarkMode,
   sidebarCollapsed,
-  setSidebarCollapsed, }) {
-  const userName = localStorage.getItem("userName") || "Admin User";
+  setSidebarCollapsed,
+}) {
+  const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "Admin User";
   const role = localStorage.getItem("role") || "admin";
+  const todayLabel = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 
-  const [showDropdown, setShowDropdown] =
-    useState(false);
-  console.log(setSidebarCollapsed);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   return (
     <header className="navbar">
       <div className="navbar-left">
         <button
           className="menu-btn"
-          onClick={() =>
-            setSidebarCollapsed(
-              !sidebarCollapsed
-            )
-          }
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          aria-label="Toggle sidebar"
         >
           <FaBars />
         </button>
-        <h2 className="page-title">Employee Management</h2>
+        <div className="welcome-copy">
+          <h2 className="page-title">Welcome back, {userName}!</h2>
+          <p>{todayLabel}</p>
+        </div>
       </div>
 
       <div className="navbar-right">
-        <div className="search-box">
-          <input type="text" placeholder="Search employees..." />
-          <FaSearch className="search-icon" />
-        </div>
+        {role.toLowerCase() === "admin" && (
+          <nav className="top-nav-pills" aria-label="Quick navigation">
+            <NavLink to="/employees"><FaUsers /> Team</NavLink>
+            <NavLink to="/attendance"><FaCalendarAlt /> Attendance</NavLink>
+            <NavLink to="/departments"><FaBuilding /> Departments</NavLink>
+          </nav>
+        )}
+
+        <NotificationBell />
 
         <button
           className="theme-btn"
-          onClick={() =>
-            setDarkMode &&
-            setDarkMode(!darkMode)
-          }
+          onClick={() => setDarkMode && setDarkMode(!darkMode)}
+          aria-label="Toggle theme"
         >
-          {darkMode ? (
-            <FaSun />
-          ) : (
-            <FaMoon />
-          )}
+          {darkMode ? <FaSun /> : <FaMoon />}
         </button>
 
-        <NotificationBell />
-        <div
-          className="profile"
-          onClick={() =>
-            setShowDropdown(
-              !showDropdown
-            )
-          }
-        >
-          <FaUserCircle className="profile-icon" />
+        <div className="profile" onClick={() => setShowDropdown(!showDropdown)}>
+          <div className="profile-avatar">{userName.charAt(0).toUpperCase()}</div>
 
           <div className="profile-info">
             <h4>{userName}</h4>
-
-            <p>
-              {role.charAt(0).toUpperCase() +
-                role.slice(1)}
-            </p>
+            <p>{role.charAt(0).toUpperCase() + role.slice(1)}</p>
           </div>
 
-          <FaChevronDown />
+          <FaChevronDown className="profile-chevron" />
 
           {showDropdown && (
             <div className="profile-dropdown">
@@ -100,3 +95,4 @@ function Navbar({ darkMode,
 }
 
 export default Navbar;
+

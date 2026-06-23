@@ -4,6 +4,8 @@ from app.services.employee_service import (
     add_employee,
     update_employee,
     delete_employee,
+    transfer_employee_department,
+    get_department_transfer_history,
 )
 from app.services.employee_service import (
     import_jsonplaceholder_users
@@ -46,5 +48,19 @@ def remove_employee(
     employee_id
 ):
     return delete_employee(
+        employee_id
+    )
+
+def transfer_department(employee_id, data):
+    return transfer_employee_department(
+        employee_id,
+        data
+    )
+
+
+
+def fetch_department_transfer_history(company_id=None, employee_id=None):
+    return get_department_transfer_history(
+        company_id,
         employee_id
     )

@@ -12,7 +12,7 @@ def create_audit_log(
     db = SessionLocal()
 
     log = AuditLog(
-         user_name=user_name,
+        user_name=user_name,
         action=action,
         related_employee=related_employee,
         company_id=company_id,
@@ -25,15 +25,16 @@ def create_audit_log(
     db.close()
 
 
-def get_audit_logs():
+def get_audit_logs(company_id=None):
     db = SessionLocal()
 
-    logs = db.query(AuditLog).all()
+    query = db.query(AuditLog)
+    if company_id is not None:
+        query = query.filter(AuditLog.company_id == company_id)
 
-    result = [
-        log.to_dict()
-        for log in logs
-    ]
+    logs = query.order_by(AuditLog.id.desc()).all()
+
+    result = [log.to_dict() for log in logs]
 
     db.close()
 
