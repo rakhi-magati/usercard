@@ -22,6 +22,8 @@ from app.routes.reactivation_routes import router as reactivation_router
 from app.routes.notification_routes import router as notification_router
 from app.routes.attendance_routes import router as attendance_router
 
+
+
 app = FastAPI()
 
 # Create all tables

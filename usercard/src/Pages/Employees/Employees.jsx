@@ -147,6 +147,7 @@ const recordTransferArtifacts = ({ companyId, employee, fromDepartment, toDepart
 };
 
 function Employees() {
+  const role = localStorage.getItem("role")?.toLowerCase() || "user";
   const [employees, setEmployees] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
@@ -387,16 +388,18 @@ function Employees() {
           <p>Transfer employees between departments and track every move.</p>
         </div>
 
-        <button
-          className="add-employee-btn"
-          onClick={() => {
-            setEditId(null);
-            resetForm();
-            setShowModal(true);
-          }}
-        >
-          + Add Employee
-        </button>
+        {role === "admin" && (
+          <button
+            className="add-employee-btn"
+            onClick={() => {
+              setEditId(null);
+              resetForm();
+              setShowModal(true);
+            }}
+          >
+            + Add Employee
+          </button>
+        )}
       </div>
 
       <div className="table-card">
@@ -439,22 +442,35 @@ function Employees() {
                 </td>
                 <td>{employee.join_date || "N/A"}</td>
                 <td>
-                  <div className="action-buttons">
-                    <button className="edit-btn" onClick={() => handleEdit(employee)}>
-                      <FaEdit />
-                      <span>Edit</span>
-                    </button>
+                  {role === "admin" ? (
+                    <div className="action-buttons">
+                      <button
+                        className="edit-btn"
+                        onClick={() => handleEdit(employee)}
+                      >
+                        <FaEdit />
+                        <span>Edit</span>
+                      </button>
 
-                    <button className="transfer-btn" onClick={() => openTransferModal(employee)}>
-                      <FaExchangeAlt />
-                      <span>Transfer</span>
-                    </button>
+                      <button
+                        className="transfer-btn"
+                        onClick={() => openTransferModal(employee)}
+                      >
+                        <FaExchangeAlt />
+                        <span>Transfer</span>
+                      </button>
 
-                    <button className="delete-btn" onClick={() => handleDelete(employee.id)}>
-                      <FaTrash />
-                      <span>Delete</span>
-                    </button>
-                  </div>
+                      <button
+                        className="delete-btn"
+                        onClick={() => handleDelete(employee.id)}
+                      >
+                        <FaTrash />
+                        <span>Delete</span>
+                      </button>
+                    </div>
+                  ) : (
+                    "-"
+                  )}
                 </td>
               </tr>
             ))}
@@ -489,29 +505,31 @@ function Employees() {
         </div>
       </div>
 
-      <section className="transfer-history-card">
-        <div className="transfer-history-header">
-          <h3><FaHistory /> Department Transfer History</h3>
-          <span>{transferHistory.length} records</span>
-        </div>
+      {role === "admin" && (
+        <section className="transfer-history-card">
+          <div className="transfer-history-header">
+            <h3><FaHistory /> Department Transfer History</h3>
+            <span>{transferHistory.length} records</span>
+          </div>
 
-        <div className="transfer-history-list">
-          {transferHistory.length === 0 ? (
-            <p className="transfer-empty">No department transfers yet.</p>
-          ) : (
-            transferHistory.slice(0, 6).map((transfer) => (
-              <div className="transfer-history-item" key={transfer.id}>
-                <div>
-                  <strong>{transfer.employee_name}</strong>
-                  <p>{transfer.from_department} to {transfer.to_department}</p>
+          <div className="transfer-history-list">
+            {transferHistory.length === 0 ? (
+              <p className="transfer-empty">No department transfers yet.</p>
+            ) : (
+              transferHistory.slice(0, 6).map((transfer) => (
+                <div className="transfer-history-item" key={transfer.id}>
+                  <div>
+                    <strong>{transfer.employee_name}</strong>
+                    <p>{transfer.from_department} to {transfer.to_department}</p>
+                  </div>
+                  <span>{new Date(transfer.transferred_at).toLocaleString()}</span>
                 </div>
-                <span>{new Date(transfer.transferred_at).toLocaleString()}</span>
-              </div>
-            ))
-          )}
-        </div>
-      </section>
+              ))
+            )}
+          </div>
+        </section>
 
+      )}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">
@@ -527,7 +545,8 @@ function Employees() {
         </div>
       )}
 
-      {showTransferModal && selectedEmployee && (
+
+      {role === "admin" && showTransferModal && selectedEmployee && (
         <div className="modal-overlay">
           <div className="modal-content transfer-modal">
             <div className="modal-header">
