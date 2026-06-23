@@ -1,4 +1,4 @@
-﻿from datetime import date, datetime
+from datetime import date, datetime
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 import csv
@@ -14,13 +14,23 @@ router = APIRouter(
 )
 
 
-def attendance_status(employee_status):
+def employee_account_status(employee_status):
     status = (employee_status or "active").lower()
     if status == "active":
         return "Active"
     if status == "inactive":
         return "Inactive"
     return status.title()
+
+
+def attendance_status(record=None, employee_status=None):
+    if record and record.check_out:
+        return "Checked Out"
+    if record and record.check_in:
+        return "Checked In"
+    if (employee_status or "").lower() == "inactive":
+        return "Inactive"
+    return "Not Checked In"
 
 
 def calculate_hours(check_in, check_out):
@@ -52,7 +62,8 @@ def build_attendance_row(employee, attendance_date, record=None):
         "email": employee.email,
         "department": employee.department,
         "date": attendance_date,
-        "status": record.status if record else attendance_status(employee.status),
+        "status": attendance_status(record, employee.status),
+        "employeeStatus": employee_account_status(employee.status),
         "checkIn": format_time(record.check_in) if record else "",
         "checkOut": format_time(record.check_out) if record else "",
         "hours": record.hours if record else "",

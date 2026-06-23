@@ -494,6 +494,25 @@ body.dark-mode .attendance-table td {
   color: #ef4444;
 }
 
+.attendance-pill.checked-in {
+  background: #d7fbe8;
+  border: 1px solid #5ee6a1;
+  color: #009b5a;
+}
+
+.attendance-pill.checked-out {
+  background: #e5edff;
+  border: 1px solid #8fb0ff;
+  color: #2563eb;
+}
+
+.attendance-pill.not-checked-in {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+}
+
+
 .admin-pagination {
   border-top: 1px solid #d7dee8;
   display: flex;

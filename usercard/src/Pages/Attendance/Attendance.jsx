@@ -45,6 +45,42 @@ const rowsPerPage = 8;
 
 const normalizeStatus = (status = "") => status.toLowerCase().replace(/\s+/g, "-");
 
+const getValue = (record, keys, fallback = "") => {
+  for (const key of keys) {
+    if (record?.[key] !== undefined && record[key] !== null && record[key] !== "") {
+      return record[key];
+    }
+  }
+  return fallback;
+};
+
+const formatTimeValue = (value) => {
+  if (!value) return "-";
+  if (typeof value !== "string") return value;
+
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime()) && value.includes("T")) {
+    return parsed.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
+
+  return value;
+};
+
+const getCheckIn = (record) => getValue(record, ["checkIn", "check_in", "checkin", "check_in_time"]);
+const getCheckOut = (record) => getValue(record, ["checkOut", "check_out", "checkout", "check_out_time"]);
+const getHours = (record) => getValue(record, ["hours", "totalHours", "total_hours"]);
+
+const getAttendanceStatus = (record) => {
+  const status = getValue(record, ["attendanceStatus", "attendance_status", "status"]);
+  const checkIn = getCheckIn(record);
+  const checkOut = getCheckOut(record);
+
+  if (checkOut) return "Checked Out";
+  if (checkIn) return "Checked In";
+  if (status && status.toLowerCase() !== "active") return status;
+  return "Not Checked In";
+};
+
 function Attendance() {
   const role = localStorage.getItem("role")?.toLowerCase() || "user";
   const companyId = localStorage.getItem("company_id") || "1";
@@ -70,8 +106,10 @@ function Attendance() {
   const today = formatDate();
   const myRecords = records.filter((record) => record.email === userEmail || record.name === userName);
   const todayRecord = myRecords.find((record) => record.date === today);
-  const hasCheckedIn = Boolean(todayRecord?.checkIn);
-  const hasCheckedOut = Boolean(todayRecord?.checkOut);
+  const todayCheckIn = getCheckIn(todayRecord);
+  const todayCheckOut = getCheckOut(todayRecord);
+  const hasCheckedIn = Boolean(todayCheckIn);
+  const hasCheckedOut = Boolean(todayCheckOut);
 
   useEffect(() => {
     writeJson(getRequestKey(companyId), accessRequests);
@@ -149,10 +187,10 @@ function Attendance() {
   }, [adminDate, adminPage, adminSearch, companyId, role]);
 
   const adminTotalPages = Math.max(1, Math.ceil(adminTotal / rowsPerPage));
-  const adminCounts = adminRows.reduce(
-    (counts, record) => ({ ...counts, [record.status]: (counts[record.status] || 0) + 1 }),
-    {}
-  );
+  const adminCounts = adminRows.reduce((counts, record) => {
+    const status = getAttendanceStatus(record);
+    return { ...counts, [status]: (counts[status] || 0) + 1 };
+  }, {});
 
   useEffect(() => {
     setAdminPage(1);
@@ -288,10 +326,10 @@ function Attendance() {
                       </td>
                       <td>{record.department}</td>
                       <td>{record.date}</td>
-                      <td>{renderStatus(record.status)}</td>
-                      <td>{record.checkIn || "-"}</td>
-                      <td>{record.checkOut || "-"}</td>
-                      <td>{record.hours || "-"}</td>
+                      <td>{renderStatus(getAttendanceStatus(record))}</td>
+                      <td>{formatTimeValue(getCheckIn(record))}</td>
+                      <td>{formatTimeValue(getCheckOut(record))}</td>
+                      <td>{getHours(record) || "-"}</td>
                     </tr>
                   ))
                 ) : (
@@ -318,9 +356,10 @@ function Attendance() {
 
         <div className="admin-attendance-footer">
           <div className="admin-attendance-legend">
-            <span><i className="dot active" /> Active: {adminCounts.Active || 0}</span>
+            <span><i className="dot active" /> Checked In: {adminCounts["Checked In"] || 0}</span>
+            <span><i className="dot active" /> Checked Out: {adminCounts["Checked Out"] || 0}</span>
+            <span><i className="dot inactive" /> Not Checked In: {adminCounts["Not Checked In"] || 0}</span>
             <span><i className="dot inactive" /> Inactive: {adminCounts.Inactive || 0}</span>
-            <span><i className="dot active" /> Present: {adminCounts.Present || 0}</span>
           </div>
           <p>Loaded from API - Total employees: {adminTotal}</p>
         </div>
@@ -364,8 +403,9 @@ function Attendance() {
         <section className="attendance-panel">
           <h3><FaCalendarAlt /> Today's Attendance</h3>
           <p className="muted-line">{userName} - {userDepartment}</p>
-          <div className="wide-status">{renderStatus(todayRecord?.status || "Not Checked In")}</div>
-          <p className="muted-line">{todayRecord?.checkIn ? `Checked in ${todayRecord.checkIn}` : "Not checked in"}</p>
+          <div className="wide-status">{renderStatus(todayRecord ? getAttendanceStatus(todayRecord) : "Not Checked In")}</div>
+          <p className="muted-line">{todayCheckIn ? `Checked in ${formatTimeValue(todayCheckIn)}` : "Not checked in"}</p>
+          {todayCheckOut && <p className="muted-line">Checked out {formatTimeValue(todayCheckOut)}</p>}
           {userError && <div className="attendance-api-error">{userError}</div>}
           <div className="attendance-button-row">
             <button className="attendance-primary" onClick={() => markAttendance("checkIn")} disabled={hasCheckedIn}>
@@ -415,7 +455,7 @@ function Attendance() {
             </thead>
             <tbody>
               {myRecords.map((record) => (
-                <tr key={record.id}><td>{record.date}</td><td>{renderStatus(record.status)}</td><td>{record.checkIn || "-"}</td><td>{record.checkOut || "-"}</td><td>{record.hours || "-"}</td></tr>
+                <tr key={record.id}><td>{record.date}</td><td>{renderStatus(getAttendanceStatus(record))}</td><td>{formatTimeValue(getCheckIn(record))}</td><td>{formatTimeValue(getCheckOut(record))}</td><td>{getHours(record) || "-"}</td></tr>
               ))}
               {myRecords.length === 0 && <tr><td colSpan="5">No attendance history found.</td></tr>}
             </tbody>
