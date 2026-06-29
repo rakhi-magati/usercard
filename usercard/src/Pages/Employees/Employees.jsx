@@ -172,7 +172,7 @@ function Employees() {
     role: "",
     status: "active",
     join_date: "",
-    company_id: 1,
+    company_id: getCompanyId(),
   });
   const [errors] = useState({
     name: "",
@@ -229,7 +229,7 @@ function Employees() {
       role: "",
       status: "active",
       join_date: "",
-      company_id: 1,
+      company_id: getCompanyId(),
     });
   };
 
@@ -247,10 +247,11 @@ function Employees() {
     }
 
     try {
+      const payload = { ...formData, company_id: companyId, admin_name: adminName };
       if (editId) {
-        await updateEmployee(editId, formData);
+        await updateEmployee(editId, payload);
       } else {
-        await addEmployee(formData);
+        await addEmployee(payload);
       }
 
       await fetchEmployees();
@@ -322,10 +323,11 @@ function Employees() {
           department: nextDepartment,
           reason: transferForm.reason,
           admin_name: adminName,
+          company_id: companyId,
         });
         serverTransfer = transferResponse?.transfer || null;
       } catch {
-        await updateEmployee(selectedEmployee.id, updatedEmployee);
+        await updateEmployee(selectedEmployee.id, { ...updatedEmployee, company_id: companyId, admin_name: adminName });
       }
 
       const nextEmployees = employees.map((employee) =>
@@ -366,7 +368,7 @@ function Employees() {
     if (!confirmDelete) return;
 
     try {
-      await deleteEmployee(id);
+      await deleteEmployee(id, companyId, adminName);
       fetchEmployees();
       toast.success("Employee Deleted Successfully");
     } catch (error) {
@@ -599,5 +601,6 @@ function Employees() {
 }
 
 export default Employees;
+
 
 

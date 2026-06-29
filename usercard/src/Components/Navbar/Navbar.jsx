@@ -10,6 +10,7 @@ import {
 } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 import NotificationBell from "../NotificationBell/NotificationBell";
+import { recordCurrentUserLogout } from "../../services/activityService";
 import "./Navbar.css";
 import { useState } from "react";
 
@@ -79,6 +80,7 @@ function Navbar({
             <div className="profile-dropdown">
               <button
                 onClick={() => {
+                  recordCurrentUserLogout();
                   localStorage.clear();
                   window.location.href = "/";
                 }}
@@ -95,4 +97,5 @@ function Navbar({
 }
 
 export default Navbar;
+
 

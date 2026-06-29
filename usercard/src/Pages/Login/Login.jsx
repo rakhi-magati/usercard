@@ -1,7 +1,10 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaUsers, FaEnvelope, FaLock, FaEye } from "react-icons/fa";
+import { FaUsers, FaEnvelope, FaLock, FaEye, FaBuilding } from "react-icons/fa";
+import { COMPANIES, getCompanyName, getUserCompanyId } from "../../constants/companies";
+import { recordLoginActivity } from "../../services/activityService";
 import "./Login.css";
+
 
 const readJson = (key, fallback) => {
   try {
@@ -16,10 +19,11 @@ const writeJson = (key, value) => {
   localStorage.setItem(key, JSON.stringify(value));
 };
 
+
 const ensureAttendanceAccessRequest = (user) => {
   if (user.role?.toLowerCase() !== "user") return;
 
-  const companyId = String(user.company_id || "1");
+  const companyId = getUserCompanyId(user);
   const requestKey = `attendance_access_requests_${companyId}`;
   const notificationKey = `local_notifications_${companyId}`;
   const requests = readJson(requestKey, []);
@@ -58,31 +62,40 @@ function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [companyId, setCompanyId] = useState("1");
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     const users = JSON.parse(localStorage.getItem("users")) || [];
-    const user = users.find((u) => u.email === email && u.password === password);
+    const user = users.find(
+      (u) =>
+        u.email === email &&
+        u.password === password &&
+        getUserCompanyId(u) === companyId
+    );
 
     if (user) {
+      const selectedCompanyName = user.company_name || user.companyName || getCompanyName(companyId);
+
       localStorage.setItem("token", `${user.role}-token`);
       localStorage.setItem("role", user.role);
       localStorage.setItem("userName", user.name);
       localStorage.setItem("name", user.name);
       localStorage.setItem("email", user.email);
-      localStorage.setItem("company_id", user.company_id || "1");
-      ensureAttendanceAccessRequest(user);
+      localStorage.setItem("company_id", companyId);
+      localStorage.setItem("company_name", selectedCompanyName);
+      ensureAttendanceAccessRequest({ ...user, company_id: companyId, company_name: selectedCompanyName });
+      await recordLoginActivity({ ...user, company_id: companyId, company_name: selectedCompanyName }, companyId);
       if (user.employeeId) localStorage.setItem("employeeId", user.employeeId);
 
-      // Check deactivated status
       if (user.status === "inactive") {
         navigate("/account-deactivated");
       } else {
         navigate("/dashboard");
       }
     } else {
-      alert("Invalid Credentials");
+      alert(`Invalid credentials for ${getCompanyName(companyId)}`);
     }
   };
 
@@ -93,7 +106,35 @@ function Login() {
         <form className="login-card" onSubmit={handleLogin}>
           <div className="login-icon"><FaUsers /></div>
           <h2>Welcome Back!</h2>
-          <p>Login to your account</p>
+          <p>Login to your company account</p>
+
+          <div className="login-company-options" role="radiogroup" aria-label="Company selection">
+            {COMPANIES.map((company) => (
+              <button
+                type="button"
+                key={company.id}
+                className={companyId === company.id ? "active" : ""}
+                onClick={() => setCompanyId(company.id)}
+                role="radio"
+                aria-checked={companyId === company.id}
+              >
+                <FaBuilding />
+                {company.name}
+              </button>
+            ))}
+          </div>
+
+          <div className="input-group">
+            <label>Company</label>
+            <div className="input-box">
+              <FaBuilding />
+              <select value={companyId} onChange={(e) => setCompanyId(e.target.value)} required>
+                {COMPANIES.map((company) => (
+                  <option key={company.id} value={company.id}>{company.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
 
           <div className="input-group">
             <label>Email</label>
@@ -141,5 +182,6 @@ function Login() {
 }
 
 export default Login;
+
 
 

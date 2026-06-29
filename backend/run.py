@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import inspect, text
 
 from app.database import Base, engine
 
@@ -12,6 +13,8 @@ from app.models.reactivation_model import ReactivationRequest
 from app.models.notification_model import Notification
 from app.models.department_transfer_model import DepartmentTransferHistory
 from app.models.attendance_model import AttendanceRecord
+from app.models.role_request_model import RoleRequest
+from app.models.user_activity_model import UserActivity
 
 # Import all routers
 from app.routes.employee_routes import router as employee_router
@@ -21,7 +24,7 @@ from app.routes.invitation_routes import router as invitation_router
 from app.routes.reactivation_routes import router as reactivation_router
 from app.routes.notification_routes import router as notification_router
 from app.routes.attendance_routes import router as attendance_router
-
+from app.routes.user_activity_routes import router as user_activity_router
 
 
 app = FastAPI()
@@ -29,10 +32,24 @@ app = FastAPI()
 # Create all tables
 Base.metadata.create_all(bind=engine)
 
+
+def ensure_existing_sqlite_schema():
+    inspector = inspect(engine)
+    if "role_requests" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("role_requests")}
+    if "company_id" not in columns:
+        with engine.begin() as connection:
+            connection.execute(text("ALTER TABLE role_requests ADD COLUMN company_id INTEGER DEFAULT 1"))
+
+
+ensure_existing_sqlite_schema()
+
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -46,8 +63,12 @@ app.include_router(invitation_router)
 app.include_router(reactivation_router)
 app.include_router(notification_router)
 app.include_router(attendance_router)
+app.include_router(user_activity_router)
 
 
 @app.get("/")
 def home():
     return {"message": "Employee API Running"}
+
+
+

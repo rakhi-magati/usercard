@@ -18,8 +18,10 @@ export const updateEmployee = async (id, employee) => {
   return response.data;
 };
 
-export const deleteEmployee = async (id) => {
-  const response = await axios.delete(`${EMP_API}/${id}`);
+export const deleteEmployee = async (id, companyId = 1, adminName = "Admin") => {
+  const response = await axios.delete(`${EMP_API}/${id}`, {
+    params: { company_id: companyId, admin_name: adminName },
+  });
   return response.data;
 };
 export const transferEmployeeDepartment = async (id, transfer) => {
@@ -159,3 +161,34 @@ export const checkOutAttendance = async ({ companyId = 1, email, date }) => {
   });
   return response.data.data;
 };
+
+// Role Requests
+export const getRoleRequests = async (companyId = 1, status = "") => {
+  const response = await axios.get(`${API}/role-requests`, {
+    params: { company_id: companyId, status: status || undefined },
+  });
+  return response.data.data;
+};
+
+export const createRoleRequest = async (data) => {
+  const response = await axios.post(`${API}/role-requests`, data);
+  return response.data.data;
+};
+
+export const approveRoleRequest = async (id, companyId = 1, adminName = "Admin") => {
+  const response = await axios.put(`${API}/role-requests/${id}/approve`, {
+    company_id: companyId,
+    admin_name: adminName,
+  });
+  return response.data.data;
+};
+
+export const rejectRoleRequest = async (id, companyId = 1, adminName = "Admin") => {
+  const response = await axios.put(`${API}/role-requests/${id}/reject`, {
+    company_id: companyId,
+    admin_name: adminName,
+  });
+  return response.data.data;
+};
+
+

@@ -4,8 +4,6 @@ from app.database import SessionLocal
 from app.models.employee_model import Employee
 from app.models.department_transfer_model import DepartmentTransferHistory
 from app.models.notification_model import Notification
-# from app.models.audit_log_model import AuditLog
-# from datetime import datetime
 from app.services.audit_service import create_audit_log
 
 
@@ -20,7 +18,6 @@ def import_jsonplaceholder_users():
     imported_count = 0
 
     for user in users:
-
         existing_user = db.query(Employee).filter(
             Employee.email == user["email"]
         ).first()
@@ -49,44 +46,36 @@ def import_jsonplaceholder_users():
     }
 
 
-def get_all_employees(
-    company_id
-):
+def get_all_employees(company_id):
     db = SessionLocal()
 
     employees = db.query(Employee).filter(
         Employee.company_id == company_id
-
     ).all()
 
-    result = [
-        employee.to_dict()
-        for employee in employees
-
-    ]
-
+    result = [employee.to_dict() for employee in employees]
     db.close()
-
     return result
 
-def get_employee_by_id(employee_id):
+
+def get_employee_by_id(employee_id, company_id=1):
     db = SessionLocal()
 
-    employee = db.query(Employee).filter(
-        Employee.id == employee_id
-    ).first()
+    query = db.query(Employee).filter(Employee.id == employee_id)
+    if company_id is not None:
+        query = query.filter(Employee.company_id == company_id)
 
+    employee = query.first()
     result = employee.to_dict() if employee else None
 
     db.close()
     return result
 
 
-#  FIXED ADD EMPLOYEE
 def add_employee(data):
-    print("Received Data:", data)
-
     db = SessionLocal()
+    company_id = data.get("company_id", 1)
+    admin_name = data.get("admin_name", "Admin")
 
     employee = Employee(
         name=data.get("name"),
@@ -95,11 +84,9 @@ def add_employee(data):
         department=data.get("department"),
         salary=data.get("salary"),
         city=data.get("city"),
-        status=data.get("status"),
+        status=data.get("status", "active"),
         join_date=data.get("join_date"),
-
-        company_id=data.get("company_id", 1)
-
+        company_id=company_id
     )
 
     db.add(employee)
@@ -109,24 +96,25 @@ def add_employee(data):
     result = employee.to_dict()
 
     create_audit_log(
-      user_name="Admin",
-     action="Employee Created",
-     company_id=employee.company_id,
-     related_employee=employee.name
+        user_name=admin_name,
+        action="Employee Created",
+        company_id=employee.company_id,
+        related_employee=employee.name
     )
 
     db.close()
     return result
 
 
-#  FIXED UPDATE EMPLOYEE
 def update_employee(employee_id, data):
     db = SessionLocal()
+    company_id = data.get("company_id", 1)
 
-    employee = db.query(Employee).filter(
-        Employee.id == employee_id
-    ).first()
+    query = db.query(Employee).filter(Employee.id == employee_id)
+    if company_id is not None:
+        query = query.filter(Employee.company_id == company_id)
 
+    employee = query.first()
     if not employee:
         db.close()
         return None
@@ -137,43 +125,38 @@ def update_employee(employee_id, data):
     employee.department = data.get("department", employee.department)
     employee.salary = data.get("salary", employee.salary)
     employee.city = data.get("city", employee.city)
-
-
-    #  ADD THESE
     employee.status = data.get("status", employee.status)
     employee.join_date = data.get("join_date", employee.join_date)
-    employee.company_id = data.get("company_id", employee.company_id)
 
     db.commit()
-
-    create_audit_log(
-    user_name="Admin",
-    action="Employee Updated",
-    related_employee=employee.name,
-    company_id=employee.company_id
-)
-
     db.refresh(employee)
 
+    create_audit_log(
+        user_name=data.get("admin_name", "Admin"),
+        action="Employee Updated",
+        related_employee=employee.name,
+        company_id=employee.company_id
+    )
+
     result = employee.to_dict()
-    
     db.close()
     return result
 
 
-def delete_employee(employee_id):
+def delete_employee(employee_id, company_id=1, admin_name="Admin"):
     db = SessionLocal()
 
-    employee = db.query(Employee).filter(
-        Employee.id == employee_id
-    ).first()
+    query = db.query(Employee).filter(Employee.id == employee_id)
+    if company_id is not None:
+        query = query.filter(Employee.company_id == company_id)
 
+    employee = query.first()
     if not employee:
         db.close()
         return False
 
     create_audit_log(
-        user_name="Admin",
+        user_name=admin_name,
         action="Employee Deleted",
         related_employee=employee.name,
         company_id=employee.company_id
@@ -182,8 +165,8 @@ def delete_employee(employee_id):
     db.delete(employee)
     db.commit()
     db.close()
-
     return True
+
 
 def get_department_transfer_history(company_id=None, employee_id=None):
     db = SessionLocal()
@@ -203,11 +186,13 @@ def get_department_transfer_history(company_id=None, employee_id=None):
 
 def transfer_employee_department(employee_id, data):
     db = SessionLocal()
+    company_id = data.get("company_id", 1)
 
-    employee = db.query(Employee).filter(
-        Employee.id == employee_id
-    ).first()
+    query = db.query(Employee).filter(Employee.id == employee_id)
+    if company_id is not None:
+        query = query.filter(Employee.company_id == company_id)
 
+    employee = query.first()
     if not employee:
         db.close()
         return None
@@ -278,6 +263,4 @@ def transfer_employee_department(employee_id, data):
 
     db.close()
     return result
-
-
 

@@ -7,10 +7,13 @@ import {
   FaSignOutAlt,
   FaUserShield,
   FaHistory,
+  FaChartLine,
+  FaFileExport,
   FaEnvelope,
   FaCube,
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
+import { recordCurrentUserLogout } from "../../services/activityService";
 import "./sidebar.css";
 
 function Sidebar({ sidebarCollapsed }) {
@@ -19,6 +22,7 @@ function Sidebar({ sidebarCollapsed }) {
   const userName = localStorage.getItem("userName") || localStorage.getItem("name") || "User";
 
   const handleLogout = () => {
+    recordCurrentUserLogout();
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     localStorage.removeItem("currentUser");
@@ -57,7 +61,9 @@ function Sidebar({ sidebarCollapsed }) {
             <NavLink to="/attendance"><FaCalendarCheck />{!sidebarCollapsed && <span>Attendance</span>}</NavLink>
             <NavLink to="/role-requests"><FaBuilding />{!sidebarCollapsed && <span>Role Request</span>}</NavLink>
             <NavLink to="/audit-logs"><FaHistory />{!sidebarCollapsed && <span>Audit Logs</span>}</NavLink>
-            <NavLink to="/invitations"><FaUserShield />{!sidebarCollapsed && <span>Users</span>}</NavLink>
+            <NavLink to="/tracking"><FaChartLine />{!sidebarCollapsed && <span>Tracking</span>}</NavLink>
+            <NavLink to="/data-export"><FaFileExport />{!sidebarCollapsed && <span>Data Export Center</span>}</NavLink>
+            <NavLink to="/users"><FaUserShield />{!sidebarCollapsed && <span>Users</span>}</NavLink>
             <NavLink to="/reactivation-requests"><FaEnvelope />{!sidebarCollapsed && <span>Reactivations</span>}</NavLink>
             <NavLink to="/settings"><FaCog />{!sidebarCollapsed && <span>Settings</span>}</NavLink>
           </>
@@ -82,4 +88,9 @@ function Sidebar({ sidebarCollapsed }) {
 }
 
 export default Sidebar;
+
+
+
+
+
 

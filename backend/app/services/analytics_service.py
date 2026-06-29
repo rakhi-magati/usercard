@@ -1,6 +1,6 @@
 from app.database import SessionLocal
 from app.models.employee_model import Employee
-from sqlalchemy import func
+from app.models.role_request_model import RoleRequest
 
 
 def get_analytics(company_id: int):
@@ -28,7 +28,6 @@ def get_analytics(company_id: int):
         status_counts[status] = status_counts.get(status, 0) + 1
 
     departments = len(dept_counts)
-
     db.close()
 
     return {
@@ -52,14 +51,9 @@ def get_analytics(company_id: int):
 
 def get_pending_role_requests(company_id: int):
     db = SessionLocal()
-    from app.models.employee_model import Employee as Emp
-    # Role requests are employees with role containing "request" or pending marker
-    # In this app, role requests are stored separately; return count placeholder
-    # We'll use reactivation requests as pending requests for now
-    from app.models.reactivation_model import ReactivationRequest
-    count = db.query(ReactivationRequest).filter(
-        ReactivationRequest.company_id == company_id,
-        ReactivationRequest.status == "pending"
+    count = db.query(RoleRequest).filter(
+        RoleRequest.company_id == company_id,
+        RoleRequest.status == "pending"
     ).count()
     db.close()
     return count

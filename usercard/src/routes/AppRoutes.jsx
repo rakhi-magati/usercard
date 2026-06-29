@@ -1,4 +1,4 @@
-﻿import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "../Pages/Login/Login";
 import Signup from "../Pages/Signup/Signup";
@@ -16,6 +16,8 @@ import Settings from "../Pages/Settings/Settings";
 import AddEmployee from "../Pages/AddEmployee/AddEmployee";
 import RoleRequests from "../Pages/RoleRequests/RoleRequests";
 import AuditLogs from "../Pages/AuditLogs/AuditLogs";
+import UserActivity from "../Pages/UserActivity/UserActivity";
+import DataExportCenter from "../Pages/DataExportCenter/DataExportCenter";
 import Invitations from "../Pages/Invitations/Invitations";
 import ReactivationRequests from "../Pages/ReactivationRequests/ReactivationRequests";
 
@@ -100,14 +102,17 @@ function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapse
             }
           />
 
-          <Route
-            path="/invitations"
-            element={
-              <ProtectedRoute allowedRoles={["admin"]}>
-                <Invitations />
-              </ProtectedRoute>
-            }
-          />
+          {["/users", "/invitations"].map((path) => (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <Invitations />
+                </ProtectedRoute>
+              }
+            />
+          ))}
 
           <Route
             path="/reactivation-requests"
@@ -118,7 +123,33 @@ function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapse
             }
           />
 
-          <Route path="/audit-logs" element={<AuditLogs />} />
+          <Route
+            path="/data-export"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <DataExportCenter />
+              </ProtectedRoute>
+            }
+          />
+          {["/tracking", "/activity"].map((path) => (
+            <Route
+              key={path}
+              path={path}
+              element={
+                <ProtectedRoute allowedRoles={["admin"]}>
+                  <UserActivity />
+                </ProtectedRoute>
+              }
+            />
+          ))}
+<Route
+            path="/audit-logs"
+            element={
+              <ProtectedRoute allowedRoles={["admin"]}>
+                <AuditLogs />
+              </ProtectedRoute>
+            }
+          />
         </Route>
       </Routes>
     </BrowserRouter>
@@ -126,6 +157,13 @@ function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapse
 }
 
 export default AppRoutes;
+
+
+
+
+
+
+
 
 
 

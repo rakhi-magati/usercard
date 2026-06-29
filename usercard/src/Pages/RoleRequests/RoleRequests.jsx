@@ -1,170 +1,125 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import {
+  approveRoleRequest,
+  getRoleRequests,
+  rejectRoleRequest,
+} from "../../services/employeeService";
 import "./RoleRequests.css";
+
+const readJson = (key, fallback) => {
+  try {
+    const value = localStorage.getItem(key);
+    return value ? JSON.parse(value) : fallback;
+  } catch {
+    return fallback;
+  }
+};
+
+const normalizeStatus = (status) => String(status || "pending").toLowerCase();
+
 function RoleRequests() {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const [requests, setRequests] =
-    useState([]);
+  const companyId = localStorage.getItem("company_id") || "1";
+  const adminName = localStorage.getItem("userName") || localStorage.getItem("name") || "Admin";
 
-  useEffect(() => {
-
-    const data =
-      JSON.parse(
-        localStorage.getItem(
-          "roleRequests"
-        )
-      ) || [];
-
-    setRequests(data);
-
-  }, []);
-
-  const handleApprove = (requestId) => {
-
-    const requests =
-      JSON.parse(
-        localStorage.getItem(
-          "roleRequests"
-        )
-      ) || [];
-
-    const users =
-      JSON.parse(
-        localStorage.getItem("users")
-      ) || [];
-
-    const request =
-      requests.find(
-        (r) => r.id === requestId
+  const loadRequests = async () => {
+    try {
+      setLoading(true);
+      const data = await getRoleRequests(companyId);
+      setRequests(Array.isArray(data) ? data : []);
+      setError("");
+    } catch {
+      const localRequests = readJson("roleRequests", []).filter(
+        (request) => String(request.company_id || request.companyId || companyId) === String(companyId)
       );
-
-    const user =
-      users.find(
-        (u) =>
-          u.email === request.userEmail
-      );
-
-    if (user) {
-      user.role = "admin";
+      setRequests(localRequests);
+      setError("Showing local role requests because the API is unavailable.");
+    } finally {
+      setLoading(false);
     }
-
-    request.status = "Approved";
-
-    localStorage.setItem(
-      "users",
-      JSON.stringify(users)
-    );
-
-    localStorage.setItem(
-      "roleRequests",
-      JSON.stringify(requests)
-    );
-
-    setRequests([...requests]);
-
-    alert("Approved");
   };
 
-  const handleReject = (requestId) => {
+  useEffect(() => {
+    loadRequests();
+  }, [companyId]);
 
-    const requests =
-      JSON.parse(
-        localStorage.getItem(
-          "roleRequests"
-        )
-      ) || [];
-
-    const request =
-      requests.find(
-        (r) => r.id === requestId
-      );
-
-    request.status = "Rejected";
-
-    localStorage.setItem(
-      "roleRequests",
-      JSON.stringify(requests)
+  const syncLocalRequest = (requestId, status) => {
+    const localRequests = readJson("roleRequests", []);
+    const nextRequests = localRequests.map((request) =>
+      request.id === requestId ? { ...request, status } : request
     );
+    localStorage.setItem("roleRequests", JSON.stringify(nextRequests));
+    setRequests((current) =>
+      current.map((request) => (request.id === requestId ? { ...request, status } : request))
+    );
+  };
 
-    setRequests([...requests]);
+  const handleApprove = async (requestId) => {
+    try {
+      const updated = await approveRoleRequest(requestId, companyId, adminName);
+      setRequests((current) =>
+        current.map((request) => (request.id === requestId ? updated : request))
+      );
+    } catch {
+      syncLocalRequest(requestId, "Approved");
+    }
+  };
 
-    alert("Rejected");
+  const handleReject = async (requestId) => {
+    try {
+      const updated = await rejectRoleRequest(requestId, companyId, adminName);
+      setRequests((current) =>
+        current.map((request) => (request.id === requestId ? updated : request))
+      );
+    } catch {
+      syncLocalRequest(requestId, "Rejected");
+    }
   };
 
   return (
     <div className="role-requests-page dark-mode">
-
-      <h2>
-        Role Change Requests
-      </h2>
+      <h2>Role Change Requests</h2>
+      {error && <p>{error}</p>}
 
       <table className="requests-table">
-
         <thead>
-    
           <tr>
             <th>User</th>
-            <th>Admin Email</th>
+            <th>Current Role</th>
+            <th>Requested Role</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
-
         </thead>
 
         <tbody>
-
-          {requests.map((request) => (
-
-            <tr key={request.id}>
-
-              <td>
-                {request.userEmail}
-              </td>
-
-              <td>
-                {request.adminEmail}
-              </td>
-
-              <td>
-                {request.status}
-              </td>
-
-              <td>
-
-                {request.status ===
-                  "Pending" && (
-                  <>
-                    <button
-                      onClick={() =>
-                        handleApprove(
-                          request.id
-                        )
-                      }
-                    >
-                      Approve
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        handleReject(
-                          request.id
-                        )
-                      }
-                    >
-                      Reject
-                    </button>
-                  </>
-                )}
-
-              </td>
-
-            </tr>
-
-          ))}
-
+          {loading ? (
+            <tr><td colSpan="5">Loading requests...</td></tr>
+          ) : requests.length === 0 ? (
+            <tr><td colSpan="5">No role change requests found.</td></tr>
+          ) : (
+            requests.map((request) => (
+              <tr key={request.id}>
+                <td>{request.user_name || request.userEmail}</td>
+                <td>{request.current_role || request.currentRole || "user"}</td>
+                <td>{request.requested_role || request.requestedRole || "admin"}</td>
+                <td>{request.status}</td>
+                <td>
+                  {normalizeStatus(request.status) === "pending" && (
+                    <>
+                      <button onClick={() => handleApprove(request.id)}>Approve</button>
+                      <button onClick={() => handleReject(request.id)}>Reject</button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))
+          )}
         </tbody>
-
       </table>
-
     </div>
   );
 }

@@ -22,6 +22,7 @@ from app.services.role_request_service import (
 
 router = APIRouter()
 
+
 @router.post("/role-requests")
 def submit_role_request(data: dict):
     return {
@@ -29,30 +30,41 @@ def submit_role_request(data: dict):
         "data": create_role_request(data)
     }
 
+
 @router.get("/role-requests")
-def fetch_role_requests():
+def fetch_role_requests(company_id: int = 1, status: str = None):
     return {
         "success": True,
-        "data": get_role_requests()
+        "data": get_role_requests(company_id, status)
     }
+
 
 @router.put("/role-requests/{request_id}/approve")
-def approve_request(request_id: int):
-    return {
-        "success": True,
-        "data": approve_role_request(request_id)
-    }
+def approve_request(request_id: int, data: dict = {}):
+    updated = approve_role_request(
+        request_id,
+        data.get("company_id"),
+        data.get("admin_name", "Admin")
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="Role request not found")
+    return {"success": True, "data": updated}
+
 
 @router.put("/role-requests/{request_id}/reject")
-def reject_request(request_id: int):
-    return {
-        "success": True,
-        "data": reject_role_request(request_id)
-    }
+def reject_request(request_id: int, data: dict = {}):
+    updated = reject_role_request(
+        request_id,
+        data.get("company_id"),
+        data.get("admin_name", "Admin")
+    )
+    if not updated:
+        raise HTTPException(status_code=404, detail="Role request not found")
+    return {"success": True, "data": updated}
 
 
 @router.get("/audit-logs")
-def fetch_logs(company_id: int = None):
+def fetch_logs(company_id: int = 1):
     return {
         "success": True,
         "data": get_audit_logs(company_id),
@@ -88,7 +100,6 @@ def fetch_employees(company_id: int = 1, search: str = None, role: str = None, d
     }
 
 
-
 @router.put("/employees/{employee_id}/transfer")
 def transfer_employee_route(employee_id: int, transfer: dict):
     updated = transfer_department(employee_id, transfer)
@@ -104,9 +115,10 @@ def fetch_department_transfers(company_id: int = None, employee_id: int = None):
         "data": fetch_department_transfer_history(company_id, employee_id),
     }
 
+
 @router.get("/employees/{employee_id}")
-def fetch_employee(employee_id: int):
-    employee = fetch_employee_by_id(employee_id)
+def fetch_employee(employee_id: int, company_id: int = 1):
+    employee = fetch_employee_by_id(employee_id, company_id)
     if not employee:
         raise HTTPException(status_code=404, detail="Employee not found")
     return {"success": True, "data": employee}
@@ -126,10 +138,9 @@ def update_employee_route(employee_id: int, employee: dict):
 
 
 @router.delete("/employees/{employee_id}")
-def delete_employee_route(employee_id: int):
-    deleted = remove_employee(employee_id)
+def delete_employee_route(employee_id: int, company_id: int = 1, admin_name: str = "Admin"):
+    deleted = remove_employee(employee_id, company_id, admin_name)
     if not deleted:
         raise HTTPException(status_code=404, detail="Employee not found")
     return {"success": True, "message": "Employee deleted"}
-
 

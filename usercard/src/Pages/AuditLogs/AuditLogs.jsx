@@ -7,17 +7,17 @@ function AuditLogs() {
   const [logs, setLogs] = useState([]);
 
   useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const data = await getAuditLogs();
+        setLogs(data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     fetchLogs();
   }, []);
-
-  const fetchLogs = async () => {
-    try {
-      const data = await getAuditLogs();
-      setLogs(data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   return (
     <div className="audit-container">
@@ -30,6 +30,8 @@ function AuditLogs() {
               <th>User</th>
               <th>Action</th>
               <th>Employee</th>
+              <th>Browser</th>
+              <th>IP Address</th>
               <th>Timestamp</th>
             </tr>
           </thead>
@@ -41,18 +43,14 @@ function AuditLogs() {
                   <td>{log.user_name}</td>
                   <td>{log.action}</td>
                   <td>{log.related_employee}</td>
-                  <td>
-                    {new Date(
-                      log.timestamp
-                    ).toLocaleString()}
-                  </td>
+                  <td>{log.browser || "-"}</td>
+                  <td>{log.ip_address || "-"}</td>
+                  <td>{new Date(log.timestamp).toLocaleString()}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan="4">
-                  No Audit Logs Found
-                </td>
+                <td colSpan="6">No Audit Logs Found</td>
               </tr>
             )}
           </tbody>

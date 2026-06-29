@@ -8,6 +8,7 @@ import {
   FaShieldAlt,
   FaUser,
 } from "react-icons/fa";
+import { COMPANIES, getCompanyName } from "../../constants/companies";
 import "./Settings.css";
 
 const readJson = (key, fallback) => {
@@ -31,9 +32,10 @@ function Settings({ darkMode, setDarkMode }) {
   const email = localStorage.getItem("email") || "No email found";
   const role = localStorage.getItem("role")?.toLowerCase() || "user";
   const companyId = localStorage.getItem("company_id") || "1";
+  const companyName = localStorage.getItem("company_name") || getCompanyName(companyId);
   const isAdmin = role === "admin";
 
-  const [activeTab, setActiveTab] = useState(isAdmin ? "approvals" : "profile");
+  const [activeTab, setActiveTab] = useState("profile");
   const [roleRequests, setRoleRequests] = useState(() => readJson("roleRequests", []));
   const [leaveRequests, setLeaveRequests] = useState(() => readJson(`leave_requests_${companyId}`, []));
   const [reactivationRequests, setReactivationRequests] = useState(() =>
@@ -166,16 +168,28 @@ function Settings({ darkMode, setDarkMode }) {
   );
 
   const renderProfile = () => (
-    <div className="settings-content-section compact-settings-section">
+    <div className="settings-content-section profile-settings-section">
       <h2>Profile</h2>
-      <div className="account-info settings-profile-row">
-        <div className="avatar">{name?.charAt(0).toUpperCase()}</div>
-        <div>
-          <h4>{name}</h4>
-          <p>{email}</p>
-          <span className={`role-badge ${role}`}>{role}</span>
-        </div>
-      </div>
+      <p>Update the admin account details shown across your workspace for {companyName}.</p>
+
+      <form className="settings-profile-form">
+        <label>
+          Display Name
+          <input value={name} readOnly />
+        </label>
+        <label>
+          Email
+          <input value={email} readOnly />
+        </label>
+        <label>
+          Company
+          <select value={companyId} disabled>
+            {COMPANIES.map((company) => (
+              <option key={company.id} value={company.id}>{company.name}</option>
+            ))}
+          </select>
+        </label>
+      </form>
     </div>
   );
 
@@ -258,7 +272,7 @@ function Settings({ darkMode, setDarkMode }) {
     <div className="settings-page">
       <div className="settings-header">
         <h1>Settings</h1>
-        <p>Manage appearance, notifications, account preferences, and role access.</p>
+        <p>Manage your account preferences and system configuration.</p>
       </div>
 
       <div className="settings-grid">
@@ -307,3 +321,8 @@ function Settings({ darkMode, setDarkMode }) {
 }
 
 export default Settings;
+
+
+
+
+
