@@ -3,19 +3,23 @@ from datetime import datetime
 from app.database import SessionLocal
 from app.models.invitation_model import Invitation
 from app.services.audit_service import create_audit_log
+from app.services.employee_service import assert_actor_can_access, assert_admin
 
 
 def create_invitation(data: dict):
     db = SessionLocal()
+    company_id = data.get("company_id", 1)
+    actor = assert_actor_can_access(db, company_id, data.get("actor_email"))
+    assert_admin(actor)
 
     token = str(uuid.uuid4())
     invitation = Invitation(
-        company_id=data.get("company_id", 1),
+        company_id=company_id,
         email=data.get("email"),
         role=data.get("role", "user"),
         token=token,
         status="pending",
-        created_by=data.get("created_by", "Admin"),
+        created_by=data.get("created_by", actor.name),
         created_at=datetime.now().isoformat(),
     )
 
@@ -25,18 +29,22 @@ def create_invitation(data: dict):
     result = invitation.to_dict()
 
     create_audit_log(
-        user_name=data.get("created_by", "Admin"),
+        user_name=data.get("created_by", actor.name),
         action="Invitation Created",
         related_employee=data.get("email"),
-        company_id=data.get("company_id", 1),
+        company_id=company_id,
     )
 
     db.close()
     return result
 
 
-def get_invitations(company_id: int):
+def get_invitations(company_id: int, actor_email: str = None):
     db = SessionLocal()
+    if actor_email:
+        actor = assert_actor_can_access(db, company_id, actor_email)
+        assert_admin(actor)
+
     invitations = db.query(Invitation).filter(
         Invitation.company_id == company_id
     ).all()
@@ -45,11 +53,17 @@ def get_invitations(company_id: int):
     return result
 
 
-def revoke_invitation(invitation_id: int, admin_name: str = "Admin"):
+def revoke_invitation(invitation_id: int, admin_name: str = "Admin", company_id: int = None, actor_email: str = None):
     db = SessionLocal()
-    invitation = db.query(Invitation).filter(
-        Invitation.id == invitation_id
-    ).first()
+    lookup_company_id = company_id or 1
+    actor = assert_actor_can_access(db, lookup_company_id, actor_email)
+    assert_admin(actor)
+
+    query = db.query(Invitation).filter(Invitation.id == invitation_id)
+    if company_id is not None:
+        query = query.filter(Invitation.company_id == company_id)
+
+    invitation = query.first()
 
     if not invitation:
         db.close()

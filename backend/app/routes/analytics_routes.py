@@ -1,11 +1,18 @@
 from fastapi import APIRouter
+from app.database import SessionLocal
 from app.services.analytics_service import get_analytics, get_pending_role_requests
+from app.services.employee_service import assert_actor_can_access
 
 router = APIRouter()
 
 
 @router.get("/analytics")
-def fetch_analytics(company_id: int = 1):
+def fetch_analytics(company_id: int = 1, actor_email: str = None):
+    if actor_email:
+        db = SessionLocal()
+        assert_actor_can_access(db, company_id, actor_email)
+        db.close()
+
     data = get_analytics(company_id)
     pending = get_pending_role_requests(company_id)
     data["pending_requests"] = pending
@@ -13,7 +20,12 @@ def fetch_analytics(company_id: int = 1):
 
 
 @router.get("/analytics/kpi")
-def fetch_kpi(company_id: int = 1):
+def fetch_kpi(company_id: int = 1, actor_email: str = None):
+    if actor_email:
+        db = SessionLocal()
+        assert_actor_can_access(db, company_id, actor_email)
+        db.close()
+
     data = get_analytics(company_id)
     pending = get_pending_role_requests(company_id)
     return {
@@ -25,3 +37,4 @@ def fetch_kpi(company_id: int = 1):
             "pending_requests": pending,
         }
     }
+

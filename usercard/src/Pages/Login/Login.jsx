@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaUsers, FaEnvelope, FaLock, FaEye, FaBuilding } from "react-icons/fa";
 import { COMPANIES, getCompanyName, getUserCompanyId } from "../../constants/companies";
 import { recordLoginActivity } from "../../services/activityService";
+import { getEmployeeByEmail, syncLoginEmployee } from "../../services/employeeService";
 import "./Login.css";
-
 
 const readJson = (key, fallback) => {
   try {
@@ -18,7 +18,6 @@ const readJson = (key, fallback) => {
 const writeJson = (key, value) => {
   localStorage.setItem(key, JSON.stringify(value));
 };
-
 
 const ensureAttendanceAccessRequest = (user) => {
   if (user.role?.toLowerCase() !== "user") return;
@@ -76,21 +75,42 @@ function Login() {
     );
 
     if (user) {
-      const selectedCompanyName = user.company_name || user.companyName || getCompanyName(companyId);
+      let loginUser = { ...user };
+      try {
+        const employee = await syncLoginEmployee(user, companyId);
+        loginUser = { ...loginUser, ...employee, employeeId: employee.id };
+      } catch {
+        try {
+          const employee = await getEmployeeByEmail(user.email, companyId);
+          loginUser = { ...loginUser, ...employee, employeeId: employee.id };
+        } catch {
+          alert("Login failed because this account could not be synced with the company records.");
+          return;
+        }
+      }
 
-      localStorage.setItem("token", `${user.role}-token`);
-      localStorage.setItem("role", user.role);
-      localStorage.setItem("userName", user.name);
-      localStorage.setItem("name", user.name);
-      localStorage.setItem("email", user.email);
+      const selectedCompanyName = loginUser.company_name || loginUser.companyName || getCompanyName(companyId);
+      const status = (loginUser.status || "active").toLowerCase();
+
+      localStorage.setItem("token", `${loginUser.role}-token`);
+      localStorage.setItem("role", loginUser.role);
+      localStorage.setItem("userName", loginUser.name);
+      localStorage.setItem("name", loginUser.name);
+      localStorage.setItem("email", loginUser.email);
+      localStorage.setItem("status", status === "inactive" ? "deactivated" : status);
+      localStorage.setItem("suspension_date", loginUser.suspension_date || "");
+      localStorage.setItem("suspension_reason", loginUser.suspension_reason || "");
+      localStorage.setItem("suspended_by", loginUser.suspended_by || "");
       localStorage.setItem("company_id", companyId);
       localStorage.setItem("company_name", selectedCompanyName);
-      ensureAttendanceAccessRequest({ ...user, company_id: companyId, company_name: selectedCompanyName });
-      await recordLoginActivity({ ...user, company_id: companyId, company_name: selectedCompanyName }, companyId);
-      if (user.employeeId) localStorage.setItem("employeeId", user.employeeId);
+      ensureAttendanceAccessRequest({ ...loginUser, company_id: companyId, company_name: selectedCompanyName });
+      await recordLoginActivity({ ...loginUser, company_id: companyId, company_name: selectedCompanyName }, companyId);
+      if (loginUser.employeeId || loginUser.id) localStorage.setItem("employeeId", loginUser.employeeId || loginUser.id);
 
-      if (user.status === "inactive") {
+      if (status === "inactive" || status === "deactivated") {
         navigate("/account-deactivated");
+      } else if (status === "suspended") {
+        navigate("/account-suspended");
       } else {
         navigate("/dashboard");
       }
@@ -102,7 +122,7 @@ function Login() {
   return (
     <div className="login-container">
       <div className="login-wrapper">
-        <h2 className="login-title">Login Page</h2>
+        {/* <h2 className="login-title">Login Page</h2> */}
         <form className="login-card" onSubmit={handleLogin}>
           <div className="login-icon"><FaUsers /></div>
           <h2>Welcome Back!</h2>
@@ -156,7 +176,7 @@ function Login() {
               <FaLock />
               <input
                 type="password"
-                placeholder="Enter your password"
+                placeholder="Enter password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -173,7 +193,7 @@ function Login() {
           <button type="submit" className="login-btn">Login</button>
 
           <div className="login-footer">
-            Don't have an account? <Link to="/signup">Signup</Link>
+            Don&apos;t have an account? <Link to="/signup">Signup</Link>
           </div>
         </form>
       </div>
@@ -182,6 +202,4 @@ function Login() {
 }
 
 export default Login;
-
-
 

@@ -1,7 +1,8 @@
 .tracking-page {
-  width: min(100%, 1200px);
+  width: min(100%, 1300px);
   margin: 0 auto;
-  padding: 24px 28px 36px;
+  overflow: hidden;
+  padding: 24px 0px 36px;
   color: #0f172a;
 }
 
@@ -171,7 +172,7 @@
 
 .tracking-table-wrap {
   overflow-x: auto;
-  padding: 0 18px 18px;
+  padding: 0 
 }
 
 .tracking-table {
@@ -206,18 +207,41 @@
   background: #f8fafc;
 }
 
-.tracking-table th:nth-child(1) { width: 150px; }
-.tracking-table th:nth-child(2) { width: 70px; }
-.tracking-table th:nth-child(3) { width: 150px; }
+.tracking-table th:nth-child(1) {
+  width: 150px;
+}
+
+.tracking-table th:nth-child(2) {
+  width: 70px;
+}
+
+.tracking-table th:nth-child(3) {
+  width: 150px;
+}
+
 .tracking-table th:nth-child(4),
-.tracking-table th:nth-child(5) { width: 95px; }
+.tracking-table th:nth-child(5) {
+  width: 95px;
+}
+
 .tracking-table th:nth-child(6),
-.tracking-table th:nth-child(7) { width: 72px; }
-.tracking-table th:nth-child(8) { width: 115px; }
-.tracking-table th:nth-child(9) { width: 100px; }
+.tracking-table th:nth-child(7) {
+  width: 72px;
+}
+
+.tracking-table th:nth-child(8) {
+  width: 115px;
+}
+
+.tracking-table th:nth-child(9) {
+  width: 100px;
+}
+
 .tracking-table th:nth-child(10),
 .tracking-table th:nth-child(11),
-.tracking-table th:nth-child(12) { width: 76px; }
+.tracking-table th:nth-child(12) {
+  width: 76px;
+}
 
 .tracking-user-cell {
   display: flex;

@@ -32,7 +32,7 @@
 
 .signup-card {
   background: white;
-
+height: 90vh;
   padding: 25px;
 
   border-radius: 20px;
@@ -108,7 +108,7 @@
 
   border-radius: 12px;
 
-  padding: 10px 10px;
+  padding: 5px 5px;
 
   transition: all 0.3s ease;
 }

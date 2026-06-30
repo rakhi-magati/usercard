@@ -144,8 +144,16 @@ function EmployeeForm({
               Active
             </option>
 
-            <option value="inactive">
-              Inactive
+            <option value="deactivated">
+              Deactivated
+            </option>
+
+            <option value="suspended">
+              Suspended
+            </option>
+
+            <option value="suspended">
+              Suspended
             </option>
           </select>
         </div>
@@ -202,3 +210,8 @@ function EmployeeForm({
 }
 
 export default EmployeeForm;
+
+
+
+
+

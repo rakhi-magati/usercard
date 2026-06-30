@@ -10,6 +10,15 @@
   margin-bottom: 18px;
 }
 
+.pending-status {
+  background: #fff3cd;
+  color: #856404;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 .settings-header h1,
 .admin-settings-header h1 {
   margin: 0 0 7px;
@@ -66,7 +75,7 @@
   cursor: pointer;
 }
 
-.settings-tabs button + button {
+.settings-tabs button+button {
   margin-top: 7px;
 }
 
@@ -434,7 +443,7 @@ body.dark-theme .theme-btn {
   }
 
   .settings-tabs button,
-  .settings-tabs button + button {
+  .settings-tabs button+button {
     width: auto;
     margin-top: 0;
   }
@@ -449,4 +458,3 @@ body.dark-theme .theme-btn {
     flex-direction: column;
   }
 }
-

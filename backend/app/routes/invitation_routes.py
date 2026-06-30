@@ -10,8 +10,8 @@ router = APIRouter()
 
 
 @router.get("/invitations")
-def list_invitations(company_id: int = 1):
-    return {"success": True, "data": get_invitations(company_id)}
+def list_invitations(company_id: int = 1, actor_email: str = None):
+    return {"success": True, "data": get_invitations(company_id, actor_email)}
 
 
 @router.post("/invitations")
@@ -22,7 +22,7 @@ def send_invitation(data: dict):
 
 @router.put("/invitations/{invitation_id}/revoke")
 def revoke(invitation_id: int, data: dict = {}):
-    result = revoke_invitation(invitation_id, data.get("admin_name", "Admin"))
+    result = revoke_invitation(invitation_id, data.get("admin_name", "Admin"), data.get("company_id"), data.get("actor_email"))
     if not result:
         raise HTTPException(status_code=404, detail="Invitation not found")
     return {"success": True, "data": result}
@@ -34,3 +34,4 @@ def accept(data: dict):
     if not result:
         raise HTTPException(status_code=400, detail="Invalid or expired token")
     return {"success": True, "data": result}
+

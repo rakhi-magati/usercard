@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import {
+  FaBan,
   FaEdit,
   FaExchangeAlt,
   FaHistory,
   FaTrash,
+  FaUndo,
 } from "react-icons/fa";
 
 import {
@@ -12,6 +14,8 @@ import {
   addEmployee,
   updateEmployee,
   deleteEmployee,
+  suspendEmployee,
+  reinstateEmployee,
   transferEmployeeDepartment,
   getDepartmentTransferHistory,
 } from "../../services/employeeService";
@@ -47,6 +51,44 @@ const writeJson = (key, value) => {
 };
 
 const getCompanyId = () => localStorage.getItem("company_id") || "1";
+const normalizeStatus = (status) => {
+  const value = (status || "active").toLowerCase();
+  return value === "inactive" ? "deactivated" : value;
+};
+const statusLabel = (status) => {
+  const value = normalizeStatus(status);
+  if (value === "deactivated") return "Deactivated";
+  if (value === "suspended") return "Suspended";
+  return "Active";
+};
+
+const syncLocalUserStatus = (employee) => {
+  const users = readJson("users", []);
+  if (users.length) {
+    writeJson(
+      "users",
+      users.map((user) =>
+        user.email === employee.email
+          ? {
+              ...user,
+              status: employee.status,
+              employeeId: employee.id,
+              suspension_date: employee.suspension_date || "",
+              suspension_reason: employee.suspension_reason || "",
+              suspended_by: employee.suspended_by || "",
+            }
+          : user
+      )
+    );
+  }
+
+  if (localStorage.getItem("email") === employee.email) {
+    localStorage.setItem("status", normalizeStatus(employee.status));
+    localStorage.setItem("suspension_date", employee.suspension_date || "");
+    localStorage.setItem("suspension_reason", employee.suspension_reason || "");
+    localStorage.setItem("suspended_by", employee.suspended_by || "");
+  }
+};
 
 const updateLocalUserDepartment = (employee, department) => {
   const users = readJson("users", []);
@@ -151,8 +193,10 @@ function Employees() {
   const [employees, setEmployees] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showTransferModal, setShowTransferModal] = useState(false);
+  const [showSuspensionModal, setShowSuspensionModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [transferForm, setTransferForm] = useState({ department: "", reason: "" });
+  const [suspensionReason, setSuspensionReason] = useState("");
   const [transferHistory, setTransferHistory] = useState(() =>
     readJson(`department_transfer_history_${getCompanyId()}`, [])
   );
@@ -275,7 +319,7 @@ function Employees() {
       city: employee.city || "",
       email: employee.email || "",
       role: employee.role || "",
-      status: employee.status || "active",
+      status: normalizeStatus(employee.status),
       join_date: employee.join_date || "",
       company_id: employee.company_id || 1,
     });
@@ -292,6 +336,59 @@ function Employees() {
     setShowTransferModal(false);
     setSelectedEmployee(null);
     setTransferForm({ department: "", reason: "" });
+  };
+
+  const openSuspensionModal = (employee) => {
+    setSelectedEmployee(employee);
+    setSuspensionReason(employee.suspension_reason || "");
+    setShowSuspensionModal(true);
+  };
+
+  const closeSuspensionModal = () => {
+    setShowSuspensionModal(false);
+    setSelectedEmployee(null);
+    setSuspensionReason("");
+  };
+
+  const updateEmployeeInState = (updatedEmployee) => {
+    const nextEmployees = employees.map((employee) =>
+      employee.id === updatedEmployee.id ? updatedEmployee : employee
+    );
+    setEmployees(nextEmployees);
+    writeJson(`employees_cache_${companyId}`, nextEmployees);
+    syncLocalUserStatus(updatedEmployee);
+  };
+
+  const handleSuspend = async (event) => {
+    event.preventDefault();
+    if (!selectedEmployee || !suspensionReason.trim()) return;
+
+    try {
+      const response = await suspendEmployee(selectedEmployee.id, {
+        company_id: companyId,
+        admin_name: adminName,
+        reason: suspensionReason.trim(),
+      });
+      updateEmployeeInState(response.data);
+      toast.success("Account suspended successfully");
+      closeSuspensionModal();
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.response?.data?.detail || "Suspension failed");
+    }
+  };
+
+  const handleReinstate = async (employee) => {
+    if (!window.confirm(`Reinstate ${employee.name}?`)) return;
+
+    try {
+      const response = await reinstateEmployee(employee.id, companyId, adminName);
+      updateEmployeeInState(response.data);
+      toast.success("Account reinstated successfully");
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.response?.data?.detail || "Reinstatement failed");
+    }
   };
 
   const handleTransfer = async (event) => {
@@ -438,8 +535,8 @@ function Employees() {
                 <td>{employee.role}</td>
                 <td>{employee.department}</td>
                 <td>
-                  <span className={`status-badge ${employee.status === "inactive" ? "inactive" : "active"}`}>
-                    {employee.status === "inactive" ? "Inactive" : "Active"}
+                  <span className={`status-badge ${normalizeStatus(employee.status)}`}>
+                    {statusLabel(employee.status)}
                   </span>
                 </td>
                 <td>{employee.join_date || "N/A"}</td>
@@ -461,6 +558,25 @@ function Employees() {
                         <FaExchangeAlt />
                         <span>Transfer</span>
                       </button>
+
+                      {normalizeStatus(employee.status) === "suspended" ? (
+                        <button
+                          className="reinstate-btn"
+                          onClick={() => handleReinstate(employee)}
+                        >
+                          <FaUndo />
+                          <span>Reinstate</span>
+                        </button>
+                      ) : (
+                        <button
+                          className="suspend-btn"
+                          onClick={() => openSuspensionModal(employee)}
+                          disabled={normalizeStatus(employee.status) === "deactivated"}
+                        >
+                          <FaBan />
+                          <span>Suspend</span>
+                        </button>
+                      )}
 
                       <button
                         className="delete-btn"
@@ -548,6 +664,36 @@ function Employees() {
       )}
 
 
+      {role === "admin" && showSuspensionModal && selectedEmployee && (
+        <div className="modal-overlay">
+          <div className="modal-content suspension-modal">
+            <div className="modal-header">
+              <div>
+                <h3>Suspend Account</h3>
+                <p>{selectedEmployee.name} &bull; {selectedEmployee.role}</p>
+              </div>
+              <button className="close-btn" onClick={closeSuspensionModal}>x</button>
+            </div>
+
+            <form className="transfer-form" onSubmit={handleSuspend}>
+              <label>
+                Suspension reason
+                <textarea
+                  placeholder="Explain why this account is being suspended"
+                  value={suspensionReason}
+                  onChange={(event) => setSuspensionReason(event.target.value)}
+                  required
+                />
+              </label>
+
+              <div className="transfer-modal-actions">
+                <button type="button" className="transfer-cancel-btn" onClick={closeSuspensionModal}>Cancel</button>
+                <button type="submit" className="suspension-submit-btn">Suspend Account</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {role === "admin" && showTransferModal && selectedEmployee && (
         <div className="modal-overlay">
           <div className="modal-content transfer-modal">
@@ -601,6 +747,8 @@ function Employees() {
 }
 
 export default Employees;
+
+
 
 
 

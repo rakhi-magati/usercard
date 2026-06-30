@@ -1,11 +1,14 @@
 from app.database import SessionLocal
 from app.models.role_request_model import RoleRequest
 from app.services.audit_service import create_audit_log
+from app.services.employee_service import assert_actor_can_access, assert_admin
 
 
 def create_role_request(data):
     db = SessionLocal()
     company_id = data.get("company_id", 1)
+    if data.get("actor_email"):
+        assert_actor_can_access(db, company_id, data.get("actor_email"))
     user_name = data["user_name"]
 
     request = RoleRequest(
@@ -31,8 +34,11 @@ def create_role_request(data):
     return result
 
 
-def get_role_requests(company_id=None, status=None):
+def get_role_requests(company_id=None, status=None, actor_email=None):
     db = SessionLocal()
+    if actor_email and company_id is not None:
+        actor = assert_actor_can_access(db, company_id, actor_email)
+        assert_admin(actor)
 
     query = db.query(RoleRequest)
     if company_id is not None:
@@ -47,8 +53,11 @@ def get_role_requests(company_id=None, status=None):
     return result
 
 
-def approve_role_request(request_id, company_id=None, admin_name="Admin"):
+def approve_role_request(request_id, company_id=None, admin_name="Admin", actor_email=None):
     db = SessionLocal()
+    if actor_email and company_id is not None:
+        actor = assert_actor_can_access(db, company_id, actor_email)
+        assert_admin(actor)
 
     query = db.query(RoleRequest).filter(RoleRequest.id == request_id)
     if company_id is not None:
@@ -74,8 +83,11 @@ def approve_role_request(request_id, company_id=None, admin_name="Admin"):
     return result
 
 
-def reject_role_request(request_id, company_id=None, admin_name="Admin"):
+def reject_role_request(request_id, company_id=None, admin_name="Admin", actor_email=None):
     db = SessionLocal()
+    if actor_email and company_id is not None:
+        actor = assert_actor_can_access(db, company_id, actor_email)
+        assert_admin(actor)
 
     query = db.query(RoleRequest).filter(RoleRequest.id == request_id)
     if company_id is not None:
@@ -99,3 +111,4 @@ def reject_role_request(request_id, company_id=None, admin_name="Admin"):
     result = request.to_dict()
     db.close()
     return result
+

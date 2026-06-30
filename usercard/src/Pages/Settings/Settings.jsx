@@ -88,16 +88,72 @@ function Settings({ darkMode, setDarkMode }) {
 
   const reviewReactivationRequest = (requestId, status) => {
     const reviewedAt = new Date().toISOString();
+
+    // Update request
     const nextRequests = reactivationRequests.map((request) =>
       request.id === requestId
-        ? { ...request, status, reviewed_by: name, reviewed_at: reviewedAt }
+        ? {
+          ...request,
+          status,
+          reviewed_by: name,
+          reviewed_at: reviewedAt,
+        }
         : request
     );
+
     setReactivationRequests(nextRequests);
     writeJson(`reactivation_requests_${companyId}`, nextRequests);
     writeJson("reactivationRequests", nextRequests);
-  };
 
+    // If approved, restore employee
+    if (status === "approved") {
+      const approvedRequest = nextRequests.find(
+        (request) => request.id === requestId
+      );
+
+      const users = readJson("users", []);
+
+      const updatedUsers = users.map((user) => {
+        if (user.email === approvedRequest.email) {
+          return {
+            ...user,
+            status: "Active",
+            suspended_at: null,
+            suspended_by: null,
+            suspension_reason: null,
+          };
+        }
+        return user;
+      });
+
+      writeJson("users", updatedUsers);
+
+      // If employees are stored separately
+      const employees = readJson(`employees_cache_${companyId}`, []);
+
+      if (employees.length) {
+        const updatedEmployees = employees.map((employee) =>
+          employee.email === approvedRequest.email
+            ? {
+              ...employee,
+              status: "Active",
+              suspended_at: null,
+              suspended_by: null,
+              suspension_reason: null,
+            }
+            : employee
+        );
+
+        writeJson(`employees_cache_${companyId}`, updatedEmployees);
+      }
+
+      alert("Employee reinstated successfully.");
+    }
+
+    if (status === "rejected") {
+      alert("Reinstatement request rejected.");
+    }
+  };
   const toggleNotifications = () => {
     const next = !notificationEnabled;
     setNotificationEnabled(next);
@@ -114,17 +170,17 @@ function Settings({ darkMode, setDarkMode }) {
         {pendingRoleRequests.length === 0
           ? renderEmpty(`No pending role change requests for ${email}.`)
           : pendingRoleRequests.map((request) => (
-              <div className="approval-item" key={request.id}>
-                <div>
-                  <strong>{request.userEmail}</strong>
-                  <span>Requested admin access from {request.adminEmail || email}</span>
-                </div>
-                <div className="approval-actions">
-                  <button onClick={() => reviewRoleRequest(request.id, "Approved")}>Approve</button>
-                  <button className="reject" onClick={() => reviewRoleRequest(request.id, "Rejected")}>Reject</button>
-                </div>
+            <div className="approval-item" key={request.id}>
+              <div>
+                <strong>{request.userEmail}</strong>
+                <span>Requested admin access from {request.adminEmail || email}</span>
               </div>
-            ))}
+              <div className="approval-actions">
+                <button onClick={() => reviewRoleRequest(request.id, "Approved")}>Approve</button>
+                <button className="reject" onClick={() => reviewRoleRequest(request.id, "Rejected")}>Reject</button>
+              </div>
+            </div>
+          ))}
       </section>
 
       <section className="approval-section">
@@ -132,17 +188,37 @@ function Settings({ darkMode, setDarkMode }) {
         {pendingReactivationRequests.length === 0
           ? renderEmpty(`No pending reactivation requests for ${email}.`)
           : pendingReactivationRequests.map((request) => (
-              <div className="approval-item" key={request.id}>
+            <div className="approval-item" key={request.id}>
+              <div>
                 <div>
-                  <strong>{request.employee_name || request.name || request.email}</strong>
-                  <span>{request.reason || "No reason provided"}</span>
-                </div>
-                <div className="approval-actions">
-                  <button onClick={() => reviewReactivationRequest(request.id, "approved")}>Approve</button>
-                  <button className="reject" onClick={() => reviewReactivationRequest(request.id, "rejected")}>Reject</button>
+                  <strong>{request.employee_name || request.name}</strong>
+
+                  <p>Email : {request.email}</p>
+
+                  <p>
+                    <strong>Status :</strong>{" "}
+                    <span className="pending-status">
+                      Reinstatement Pending
+                    </span>
+                  </p>
+
+                  <p>
+                    <strong>Reason :</strong>{" "}
+                    {request.reason || "No reason provided"}
+                  </p>
+
+                  <small>
+                    Requested :
+                    {new Date(request.created_at).toLocaleString()}
+                  </small>
                 </div>
               </div>
-            ))}
+              <div className="approval-actions">
+                <button onClick={() => reviewReactivationRequest(request.id, "approved")}>Approve</button>
+                <button className="reject" onClick={() => reviewReactivationRequest(request.id, "rejected")}>Reject</button>
+              </div>
+            </div>
+          ))}
       </section>
 
       <section className="approval-section">
@@ -151,18 +227,18 @@ function Settings({ darkMode, setDarkMode }) {
         {pendingLeaveRequests.length === 0
           ? renderEmpty(`No pending leave requests for ${email}.`)
           : pendingLeaveRequests.map((request) => (
-              <div className="approval-item" key={request.id}>
-                <div>
-                  <strong>{request.name}</strong>
-                  <span>{request.type} leave · {request.startDate} to {request.endDate}</span>
-                  <small>{request.reason}</small>
-                </div>
-                <div className="approval-actions">
-                  <button onClick={() => reviewLeaveRequest(request.id, "approved")}>Approve</button>
-                  <button className="reject" onClick={() => reviewLeaveRequest(request.id, "rejected")}>Reject</button>
-                </div>
+            <div className="approval-item" key={request.id}>
+              <div>
+                <strong>{request.name}</strong>
+                <span>{request.type} leave · {request.startDate} to {request.endDate}</span>
+                <small>{request.reason}</small>
               </div>
-            ))}
+              <div className="approval-actions">
+                <button onClick={() => reviewLeaveRequest(request.id, "approved")}>Approve</button>
+                <button className="reject" onClick={() => reviewLeaveRequest(request.id, "rejected")}>Reject</button>
+              </div>
+            </div>
+          ))}
       </section>
     </div>
   );

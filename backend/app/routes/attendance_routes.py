@@ -7,6 +7,7 @@ import io
 from app.database import SessionLocal
 from app.models.employee_model import Employee
 from app.models.attendance_model import AttendanceRecord
+from app.services.employee_service import normalize_status, assert_actor_can_access
 
 router = APIRouter(
     prefix="/attendance",
@@ -15,11 +16,13 @@ router = APIRouter(
 
 
 def employee_account_status(employee_status):
-    status = (employee_status or "active").lower()
+    status = normalize_status(employee_status)
     if status == "active":
         return "Active"
-    if status == "inactive":
-        return "Inactive"
+    if status == "deactivated":
+        return "Deactivated"
+    if status == "suspended":
+        return "Suspended"
     return status.title()
 
 
@@ -28,8 +31,11 @@ def attendance_status(record=None, employee_status=None):
         return "Checked Out"
     if record and record.check_in:
         return "Checked In"
-    if (employee_status or "").lower() == "inactive":
-        return "Inactive"
+    status = normalize_status(employee_status)
+    if status == "deactivated":
+        return "Deactivated"
+    if status == "suspended":
+        return "Suspended"
     return "Not Checked In"
 
 
@@ -77,6 +83,11 @@ def get_employee_by_email(db, email, company_id):
     ).first()
 
 
+def ensure_active_employee(employee):
+    if normalize_status(employee.status) != "active":
+        raise HTTPException(status_code=403, detail="Account is not active")
+
+
 def get_record(db, employee_id, attendance_date):
     return db.query(AttendanceRecord).filter(
         AttendanceRecord.employee_id == employee_id,
@@ -118,9 +129,15 @@ def list_attendance(
     company_id: int = 1,
     attendance_date: str | None = None,
     search: str | None = None,
+    actor_email: str | None = None,
     page: int = 1,
     limit: int = 8,
 ):
+    if actor_email:
+        db = SessionLocal()
+        assert_actor_can_access(db, company_id, actor_email)
+        db.close()
+
     rows = get_attendance_rows(company_id, attendance_date, search)
     total = len(rows)
     start = (page - 1) * limit
@@ -142,6 +159,11 @@ def my_attendance(email: str, company_id: int = 1):
     if not employee:
         db.close()
         raise HTTPException(status_code=404, detail="Employee not found")
+    try:
+        ensure_active_employee(employee)
+    except HTTPException:
+        db.close()
+        raise
 
     records = db.query(AttendanceRecord).filter(
         AttendanceRecord.employee_id == employee.id,
@@ -163,6 +185,11 @@ def check_in(data: dict):
     if not employee:
         db.close()
         raise HTTPException(status_code=404, detail="Employee not found")
+    try:
+        ensure_active_employee(employee)
+    except HTTPException:
+        db.close()
+        raise
 
     record = get_record(db, employee.id, attendance_date)
     now = datetime.now().isoformat()
@@ -206,6 +233,11 @@ def check_out(data: dict):
     if not employee:
         db.close()
         raise HTTPException(status_code=404, detail="Employee not found")
+    try:
+        ensure_active_employee(employee)
+    except HTTPException:
+        db.close()
+        raise
 
     record = get_record(db, employee.id, attendance_date)
     if not record or not record.check_in:
@@ -228,7 +260,13 @@ def download_attendance(
     company_id: int = 1,
     attendance_date: str | None = None,
     search: str | None = None,
+    actor_email: str | None = None,
 ):
+    if actor_email:
+        db = SessionLocal()
+        assert_actor_can_access(db, company_id, actor_email)
+        db.close()
+
     rows = get_attendance_rows(company_id, attendance_date, search)
 
     output = io.StringIO()
@@ -268,3 +306,4 @@ def download_attendance(
             "attachment; filename=attendance_report.csv"
         }
     )
+

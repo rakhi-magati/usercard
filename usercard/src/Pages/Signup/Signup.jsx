@@ -53,7 +53,7 @@ function Signup() {
   return (
     <div className="signup-container">
       <div className="signup-wrapper">
-        <h2 className="signup-title">Create Account</h2>
+        {/* <h2 className="signup-title">Create Account</h2> */}
 
         <form className="signup-card" onSubmit={handleSignup}>
           <div className="signup-icon"><FaUser /></div>

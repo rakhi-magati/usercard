@@ -15,7 +15,7 @@ export const getAuditLogs = async (companyId = localStorage.getItem("company_id"
   const localLogs = readJson(`local_audit_logs_${companyId}`, []);
 
   try {
-    const response = await axios.get(`${API}?company_id=${companyId}`);
+    const response = await axios.get(API, { params: { company_id: companyId, actor_email: localStorage.getItem("email") || undefined } });
     const apiLogs = response.data.data || [];
     return [...localLogs, ...apiLogs].sort(
       (a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0)
@@ -24,3 +24,4 @@ export const getAuditLogs = async (companyId = localStorage.getItem("company_id"
     return localLogs;
   }
 };
+

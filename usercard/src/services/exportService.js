@@ -228,6 +228,10 @@ export const collectExportRows = async (datasetId, companyId) => {
 };
 
 export const runDataExport = async ({ datasetId, formatId, companyId, exportedBy }) => {
+  const status = (localStorage.getItem("status") || "active").toLowerCase();
+  if (status === "suspended" || status === "deactivated" || status === "inactive") {
+    throw new Error("Account access is blocked. Data export is unavailable.");
+  }
   const dataset = exportDatasets.find((item) => item.id === datasetId);
   const format = exportFormats.find((item) => item.id === formatId);
   const rows = await collectExportRows(datasetId, companyId);
@@ -273,3 +277,5 @@ export const runDataExport = async ({ datasetId, formatId, companyId, exportedBy
 
   return historyItem;
 };
+
+

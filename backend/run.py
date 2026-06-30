@@ -35,13 +35,27 @@ Base.metadata.create_all(bind=engine)
 
 def ensure_existing_sqlite_schema():
     inspector = inspect(engine)
-    if "role_requests" not in inspector.get_table_names():
-        return
+    table_names = inspector.get_table_names()
 
-    columns = {column["name"] for column in inspector.get_columns("role_requests")}
-    if "company_id" not in columns:
+    if "role_requests" in table_names:
+        columns = {column["name"] for column in inspector.get_columns("role_requests")}
+        if "company_id" not in columns:
+            with engine.begin() as connection:
+                connection.execute(text("ALTER TABLE role_requests ADD COLUMN company_id INTEGER DEFAULT 1"))
+
+    if "employees" in table_names:
+        employee_columns = {column["name"] for column in inspector.get_columns("employees")}
+        missing_employee_columns = {
+            "suspension_date": "TEXT",
+            "suspension_reason": "TEXT",
+            "suspended_by": "TEXT",
+            "suspended_by_email": "TEXT",
+        }
         with engine.begin() as connection:
-            connection.execute(text("ALTER TABLE role_requests ADD COLUMN company_id INTEGER DEFAULT 1"))
+            for column_name, column_type in missing_employee_columns.items():
+                if column_name not in employee_columns:
+                    connection.execute(text(f"ALTER TABLE employees ADD COLUMN {column_name} {column_type}"))
+            connection.execute(text("UPDATE employees SET status = 'deactivated' WHERE status = 'inactive'"))
 
 
 ensure_existing_sqlite_schema()
@@ -69,6 +83,7 @@ app.include_router(user_activity_router)
 @app.get("/")
 def home():
     return {"message": "Employee API Running"}
+
 
 
 

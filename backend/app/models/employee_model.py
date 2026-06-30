@@ -3,7 +3,6 @@ from app.database import Base
 from sqlalchemy import ForeignKey
 
 
-
 class Employee(Base):
     __tablename__ = "employees"
 
@@ -43,9 +42,12 @@ class Employee(Base):
 
     city = Column(String)
 
-    # ✅ ADD THESE FIELDS
     status = Column(String, default="active")
     join_date = Column(String)
+    suspension_date = Column(String)
+    suspension_reason = Column(String)
+    suspended_by = Column(String)
+    suspended_by_email = Column(String)
 
     def to_dict(self):
         return {
@@ -56,7 +58,11 @@ class Employee(Base):
             "department": self.department,
             "salary": self.salary,
             "city": self.city,
-            "status": self.status,          # ✅ ADD
-            "join_date": self.join_date,    # ✅ ADD
-            "company_id": self.company_id   # ✅ ADD
+            "status": self.status,
+            "join_date": self.join_date,
+            "company_id": self.company_id,
+            "suspension_date": self.suspension_date,
+            "suspension_reason": self.suspension_reason,
+            "suspended_by": self.suspended_by,
+            "suspended_by_email": self.suspended_by_email,
         }

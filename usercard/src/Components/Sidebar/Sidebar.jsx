@@ -29,6 +29,11 @@ function Sidebar({ sidebarCollapsed }) {
     localStorage.removeItem("userName");
     localStorage.removeItem("name");
     localStorage.removeItem("email");
+    localStorage.removeItem("status");
+    localStorage.removeItem("employeeId");
+    localStorage.removeItem("suspension_date");
+    localStorage.removeItem("suspension_reason");
+    localStorage.removeItem("suspended_by");
     navigate("/");
   };
 
@@ -88,6 +93,8 @@ function Sidebar({ sidebarCollapsed }) {
 }
 
 export default Sidebar;
+
+
 
 
 
