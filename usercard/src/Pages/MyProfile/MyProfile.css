@@ -1,0 +1,192 @@
+.my-profile-page {
+    padding: 28px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.page-header p {
+    color: #6b7280;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.completion-card {
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.completion-summary {
+    margin-bottom: 12px;
+}
+
+.completion-percentage {
+    font-size: 16px;
+    color: #374151;
+    margin-bottom: 10px;
+}
+
+.completion-percentage strong {
+    color: #2563eb;
+    font-size: 20px;
+}
+
+.progress-bar-track {
+    width: 100%;
+    height: 10px;
+    border-radius: 999px;
+    background: #f3f4f6;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #2563eb, #60a5fa);
+    transition: width 0.4s ease;
+}
+
+.progress-bar-fill.complete {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.completion-recommendation {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 12px 0 0;
+}
+
+.missing-fields {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #f3f4f6;
+}
+
+.missing-fields h4 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #b45309;
+    margin: 0 0 10px;
+}
+
+.missing-fields ul {
+    margin: 0;
+    padding-left: 20px;
+    color: #92400e;
+    font-size: 13px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 16px;
+}
+
+.profile-form {
+    background: white;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 24px;
+}
+
+.profile-form h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+    margin: 0 0 4px;
+}
+
+.form-hint {
+    font-size: 13px;
+    color: #9ca3af;
+    margin: 0 0 20px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #374151;
+}
+
+.form-group input,
+.form-group textarea {
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #111827;
+}
+
+.form-group textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+.form-actions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.save-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.save-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .form-grid,
+    .missing-fields ul {
+        grid-template-columns: 1fr;
+    }
+}

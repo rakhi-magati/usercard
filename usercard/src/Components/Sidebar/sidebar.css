@@ -11,6 +11,11 @@
   transition: width 0.25s ease;
   width: 214px;
   z-index: 1000;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin; /* Firefox */
+  scrollbar-color: #6656f5 #111c2e;
 }
 
 .sidebar.collapsed {

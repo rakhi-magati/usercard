@@ -240,3 +240,38 @@ export const rejectRoleRequest = async (id, companyId = 1, adminName = "Admin") 
   return response.data.data;
 };
 
+// Profile Completion
+export const getMyProfileCompletion = async (employeeId, companyId = 1) => {
+  const response = await axios.get(`${EMP_API}/${employeeId}/profile-completion`, {
+    params: { company_id: companyId },
+  });
+  return response.data.data;
+};
+
+export const updateMyProfile = async (employeeId, data) => {
+  const response = await axios.put(`${EMP_API}/${employeeId}/profile`, withActor(data));
+  return response.data.data;
+};
+
+export const getProfileCompletionOverview = async (companyId = 1, belowThresholdOnly = false, threshold) => {
+  const response = await axios.get(`${API}/profile-completion/overview`, {
+    params: {
+      company_id: companyId,
+      actor_email: getActorEmail() || undefined,
+      below_threshold_only: belowThresholdOnly || undefined,
+      threshold: threshold ?? undefined,
+    },
+  });
+  return response.data.data;
+};
+
+export const setProfileCompletionThreshold = async (companyId, threshold, adminName = "Admin") => {
+  const response = await axios.put(`${API}/profile-completion/threshold`, {
+    company_id: companyId,
+    threshold,
+    admin_name: adminName,
+    actor_email: getActorEmail(),
+  });
+  return response.data.data;
+};
+

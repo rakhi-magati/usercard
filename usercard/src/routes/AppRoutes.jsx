@@ -21,6 +21,8 @@ import UserActivity from "../Pages/UserActivity/UserActivity";
 import DataExportCenter from "../Pages/DataExportCenter/DataExportCenter";
 import Invitations from "../Pages/Invitations/Invitations";
 import ReactivationRequests from "../Pages/ReactivationRequests/ReactivationRequests";
+import MyProfile from "../Pages/MyProfile/MyProfile";
+import ProfileCompletion from "../Pages/ProfileCompletion/ProfileCompletion";
 
 import ProtectedRoute from "../Components/ProtectedRoute/ProtectedRoute";
 
@@ -57,6 +59,8 @@ function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapse
           <Route path="/users" element={<ProtectedRoute allowedRoles={["admin"]}><Invitations /></ProtectedRoute>} />
           <Route path="/invitations" element={<ProtectedRoute allowedRoles={["admin"]}><Invitations /></ProtectedRoute>} />
           <Route path="/reactivation-requests" element={<ProtectedRoute allowedRoles={["admin"]}><ReactivationRequests /></ProtectedRoute>} />
+          <Route path="/my-profile" element={<ProtectedRoute allowedRoles={["admin", "user"]}><MyProfile /></ProtectedRoute>} />
+          <Route path="/profile-completion" element={<ProtectedRoute allowedRoles={["admin"]}><ProfileCompletion /></ProtectedRoute>} />
           <Route path="/data-export" element={<ProtectedRoute allowedRoles={["admin"]}><DataExportCenter /></ProtectedRoute>} />
           <Route path="/tracking" element={<ProtectedRoute allowedRoles={["admin"]}><UserActivity /></ProtectedRoute>} />
           <Route path="/activity" element={<ProtectedRoute allowedRoles={["admin"]}><UserActivity /></ProtectedRoute>} />

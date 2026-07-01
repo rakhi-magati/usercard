@@ -70,13 +70,13 @@ const syncLocalUserStatus = (employee) => {
       users.map((user) =>
         user.email === employee.email
           ? {
-              ...user,
-              status: employee.status,
-              employeeId: employee.id,
-              suspension_date: employee.suspension_date || "",
-              suspension_reason: employee.suspension_reason || "",
-              suspended_by: employee.suspended_by || "",
-            }
+            ...user,
+            status: employee.status,
+            employeeId: employee.id,
+            suspension_date: employee.suspension_date || "",
+            suspension_reason: employee.suspension_reason || "",
+            suspended_by: employee.suspended_by || "",
+          }
           : user
       )
     );
@@ -217,6 +217,11 @@ function Employees() {
     status: "active",
     join_date: "",
     company_id: getCompanyId(),
+    designation: "",
+    phone_number: "",
+    employee_code: "",
+    profile_picture: "",
+    address: "",
   });
   const [errors] = useState({
     name: "",
@@ -274,6 +279,11 @@ function Employees() {
       status: "active",
       join_date: "",
       company_id: getCompanyId(),
+      designation: "",
+      phone_number: "",
+      employee_code: "",
+      profile_picture: "",
+      address: "",
     });
   };
 
@@ -322,6 +332,11 @@ function Employees() {
       status: normalizeStatus(employee.status),
       join_date: employee.join_date || "",
       company_id: employee.company_id || 1,
+      designation: employee.designation || "",
+      phone_number: employee.phone_number || "",
+      employee_code: employee.employee_code || "",
+      profile_picture: employee.profile_picture || "",
+      address: employee.address || "",
     });
     setShowModal(true);
   };
@@ -509,6 +524,7 @@ function Employees() {
               <th>Role</th>
               <th>Department</th>
               <th>Status</th>
+              <th>Profile</th>
               <th>Joined</th>
               <th>Actions</th>
             </tr>
@@ -517,18 +533,16 @@ function Employees() {
           <tbody>
             {currentEmployees.map((employee) => (
               <tr key={employee.id}>
-                <td className="employee-info">
-                  <div className="employee-avatar">
-                    {employee.name
-                      ?.split(" ")
-                      .map((n) => n[0])
-                      .join("")
-                      .substring(0, 2)}
-                  </div>
+                <td>
+                  <div className="employee-cell">
+                    <div className="employee-avatar">
+                      {employee.name?.charAt(0).toUpperCase()}
+                    </div>
 
-                  <div>
-                    <h4>{employee.name}</h4>
-                    <p>{employee.email}</p>
+                    <div className="employee-details">
+                      <h4>{employee.name}</h4>
+                      <p>{employee.email}</p>
+                    </div>
                   </div>
                 </td>
 
@@ -537,6 +551,18 @@ function Employees() {
                 <td>
                   <span className={`status-badge ${normalizeStatus(employee.status)}`}>
                     {statusLabel(employee.status)}
+                  </span>
+                </td>
+                <td>
+                  <span
+                    className={`profile-completion-badge ${(employee.profile_completion_score ?? 0) === 100
+                      ? "complete"
+                      : (employee.profile_completion_score ?? 0) < 60
+                        ? "low"
+                        : ""
+                      }`}
+                  >
+                    {employee.profile_completion_score ?? 0}%
                   </span>
                 </td>
                 <td>{employee.join_date || "N/A"}</td>

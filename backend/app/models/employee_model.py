@@ -49,6 +49,18 @@ class Employee(Base):
     suspended_by = Column(String)
     suspended_by_email = Column(String)
 
+    # --- Profile Completion fields ---
+    first_name = Column(String)
+    last_name = Column(String)
+    phone_number = Column(String)
+    designation = Column(String)
+    profile_picture = Column(String)
+    address = Column(String)
+    employee_code = Column(String)  # business-facing "Employee ID" (distinct from primary key `id`)
+
+    profile_completion_score = Column(Integer, default=0)
+    profile_completed_at = Column(String)  # timestamp when it first hit 100%
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -65,4 +77,13 @@ class Employee(Base):
             "suspension_reason": self.suspension_reason,
             "suspended_by": self.suspended_by,
             "suspended_by_email": self.suspended_by_email,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "phone_number": self.phone_number,
+            "designation": self.designation,
+            "profile_picture": self.profile_picture,
+            "address": self.address,
+            "employee_code": self.employee_code,
+            "profile_completion_score": self.profile_completion_score,
+            "profile_completed_at": self.profile_completed_at,
         }

@@ -102,6 +102,91 @@ function EmployeeForm({
           )}
         </div>
 
+        {/* Designation */}
+        <div className="form-group">
+          <label>Designation</label>
+
+          <input
+            type="text"
+            placeholder="Senior Software Engineer"
+            value={formData.designation || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                designation: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        {/* Phone Number */}
+        <div className="form-group">
+          <label>Phone Number</label>
+
+          <input
+            type="tel"
+            placeholder="+1 555 123 4567"
+            value={formData.phone_number || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                phone_number: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        {/* Employee ID */}
+        <div className="form-group">
+          <label>Employee ID</label>
+
+          <input
+            type="text"
+            placeholder="EMP-1042"
+            value={formData.employee_code || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                employee_code: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        {/* Profile Picture */}
+        <div className="form-group">
+          <label>Profile Picture URL</label>
+
+          <input
+            type="text"
+            placeholder="https://example.com/photo.jpg"
+            value={formData.profile_picture || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                profile_picture: e.target.value,
+              })
+            }
+          />
+        </div>
+
+        {/* Address */}
+        <div className="form-group">
+          <label>Address</label>
+
+          <input
+            type="text"
+            placeholder="Street, City, State, ZIP"
+            value={formData.address || ""}
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                address: e.target.value,
+              })
+            }
+          />
+        </div>
+
         {/* Department */}
         <div className="form-group">
           <label>

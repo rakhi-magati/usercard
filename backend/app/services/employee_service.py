@@ -190,6 +190,9 @@ def sync_login_employee(data):
         company_id=employee.company_id,
     )
 
+    from app.services.profile_completion_service import recalculate_and_persist
+    recalculate_and_persist(db, employee, actor_name=employee.name)
+
     result = employee.to_dict()
     db.close()
     return result
@@ -212,14 +215,19 @@ def add_employee(data):
         city=data.get("city"),
         status=status,
         join_date=data.get("join_date"),
-        company_id=company_id
+        company_id=company_id,
+        first_name=data.get("first_name"),
+        last_name=data.get("last_name"),
+        phone_number=data.get("phone_number"),
+        designation=data.get("designation"),
+        profile_picture=data.get("profile_picture"),
+        address=data.get("address"),
+        employee_code=data.get("employee_code"),
     )
 
     db.add(employee)
     db.commit()
     db.refresh(employee)
-
-    result = employee.to_dict()
 
     create_audit_log(
         user_name=admin_name,
@@ -227,6 +235,11 @@ def add_employee(data):
         company_id=employee.company_id,
         related_employee=employee.name
     )
+
+    from app.services.profile_completion_service import recalculate_and_persist
+    recalculate_and_persist(db, employee, actor_name=admin_name)
+
+    result = employee.to_dict()
 
     db.close()
     return result
@@ -257,6 +270,13 @@ def update_employee(employee_id, data):
     employee.city = data.get("city", employee.city)
     employee.status = next_status
     employee.join_date = data.get("join_date", employee.join_date)
+    employee.first_name = data.get("first_name", employee.first_name)
+    employee.last_name = data.get("last_name", employee.last_name)
+    employee.phone_number = data.get("phone_number", employee.phone_number)
+    employee.designation = data.get("designation", employee.designation)
+    employee.profile_picture = data.get("profile_picture", employee.profile_picture)
+    employee.address = data.get("address", employee.address)
+    employee.employee_code = data.get("employee_code", employee.employee_code)
 
     if next_status == ACTIVE:
         employee.suspension_date = None
@@ -273,6 +293,9 @@ def update_employee(employee_id, data):
         related_employee=employee.name,
         company_id=employee.company_id
     )
+
+    from app.services.profile_completion_service import recalculate_and_persist
+    recalculate_and_persist(db, employee, actor_name=data.get("admin_name", "Admin"))
 
     result = employee.to_dict()
     db.close()
@@ -479,6 +502,9 @@ def transfer_employee_department(employee_id, data):
         related_employee=employee.name,
         company_id=employee.company_id
     )
+
+    from app.services.profile_completion_service import recalculate_and_persist
+    recalculate_and_persist(db, employee, actor_name=admin_name)
 
     result = employee.to_dict()
     result["transfer"] = transfer.to_dict()

@@ -12,38 +12,78 @@
 
 .employee-table th {
   text-align: left;
-  padding: 18px;
+  padding: 25px;
   font-size: 14px;
   color: #6b7280;
   background: #f9fafb;
 }
 
-
-
 .employee-table td {
   padding: 18px;
   border-top: 1px solid #f1f5f9;
 }
+.employee-cell{
+    display:flex;
+    align-items:center;
+    gap:16px;
+}
 
+.employee-avatar{
+    width:35px;
+    height:35px;
+    border-radius:50%;
+    background:#2563eb;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:18px;
+    font-weight:700;
+    flex-shrink:0;
+}
+
+.employee-details{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+}
+
+.employee-details h4{
+    margin:0;
+    font-size:15px;
+    font-weight:700;
+    color:#111827;
+}
+
+.employee-details p{
+    margin-top:4px;
+    margin-bottom:0;
+    color:#6b7280;
+    font-size:14px;
+}
+/* 
 .employee-info {
   display: flex;
   align-items: center;
   gap: 14px;
-}
-
+} */
+/* 
 .employee-avatar {
-  width: 45px;
-  height: 45px;
-  background: #2563eb;
-  color: white;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
+  background: #2563eb;
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-}
+  font-size: 18px;
+  font-weight: 700;
+  flex-shrink: 0;
+} */
 
-.employee-info h4 {
+
+/* .employee-info h4 {
   margin: 0;
   font-size: 15px;
 }
@@ -52,7 +92,7 @@
   margin: 4px 0 0;
   color: #6b7280;
   font-size: 13px;
-}
+} */
 
 .status-badge {
   padding: 6px 14px;
@@ -74,6 +114,25 @@
 .status-badge.onleave {
   background: #fef3c7;
   color: #d97706;
+}
+
+.profile-completion-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.profile-completion-badge.low {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.profile-completion-badge.complete {
+  background: #dcfce7;
+  color: #15803d;
 }
 
 .action-buttons {
@@ -213,101 +272,6 @@
   margin-bottom: 25px;
 }
 
-/* .modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-} */
-/* 
-.employee-modal {
-  width: 650px;
-  background: white;
-  border-radius: 15px;
-  padding: 30px;
-  box-shadow: 0 10px 40px rgba(0,0,0,.2);
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-} */
-
-/* .close-btn {
-  border: none;
-  background: transparent;
-  font-size: 22px;
-  cursor: pointer;
-} */
-
-/* .employee-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 25px;
-}
-
-.employee-header h2 {
-  font-size: 28px;
-  font-weight: 700;
-  color: #1e293b;
-} */
-/* 
-.add-btn {
-  background: #2563eb;
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: 0.3s;
-}
-
-.add-btn:hover {
-  background: #1d4ed8;
-} */
-
-/* Form */
-/* 
-.employee-form {
-  background: white;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 25px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 15px;
-} */
-
-/* .employee-form input {
-  padding: 12px;
-  border: 1px solid #dbe2ea;
-  border-radius: 8px;
-  outline: none;
-}
-
-.employee-form button {
-  background: #10b981;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.employee-form button:hover {
-  background: #059669;
-} */
-
-/* Table */
-
 .table-card {
   background: white;
   border-radius: 14px;
@@ -371,9 +335,8 @@ body.light-theme .employees-container {
 
 body.light-theme .table-card,
 body.light-theme .employee-card,
-body.light-theme .modal-content
- {
-  background:transparent;
+body.light-theme .modal-content {
+  background: transparent;
   color: #1e293b;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
@@ -547,6 +510,7 @@ body.dark-theme .close-btn:hover {
     overflow-x: auto;
   }
 }
+
 .employee-header p {
   color: #64748b;
   font-size: 13px;
@@ -722,6 +686,7 @@ body.dark-theme .transfer-btn {
 }
 
 @media (max-width: 760px) {
+
   .transfer-history-item,
   .transfer-modal-actions {
     align-items: stretch;

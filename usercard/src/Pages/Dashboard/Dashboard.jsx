@@ -7,7 +7,7 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import StatCard from "../../Components/StatCard/StatCard";
-import { getAnalytics } from "../../services/employeeService";
+import { getAnalytics, getProfileCompletionOverview, getMyProfileCompletion } from "../../services/employeeService";
 import "./Dashboard.css";
 
 const COLORS = ["#2563eb", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#06b6d4"];
@@ -17,8 +17,11 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [profileCompletion, setProfileCompletion] = useState(null);
 
   const companyId = parseInt(localStorage.getItem("company_id") || "1");
+  const role = localStorage.getItem("role")?.toLowerCase() || "user";
+  const employeeId = parseInt(localStorage.getItem("employeeId") || "0");
 
   const fetchAnalytics = useCallback(async () => {
     try {
@@ -34,9 +37,32 @@ function Dashboard() {
     }
   }, [companyId]);
 
+  const fetchProfileCompletion = useCallback(async () => {
+    try {
+      if (role === "admin") {
+        const data = await getProfileCompletionOverview(companyId);
+        setProfileCompletion({
+          type: "overview",
+          average: data.average_completion,
+          belowThreshold: data.below_threshold_count,
+        });
+      } else if (employeeId) {
+        const data = await getMyProfileCompletion(employeeId, companyId);
+        setProfileCompletion({
+          type: "self",
+          percentage: data.completion_percentage,
+          missing: data.missing_fields,
+        });
+      }
+    } catch {
+      setProfileCompletion(null);
+    }
+  }, [companyId, role, employeeId]);
+
   useEffect(() => {
     fetchAnalytics();
-  }, [fetchAnalytics]);
+    fetchProfileCompletion();
+  }, [fetchAnalytics, fetchProfileCompletion]);
 
   if (loading) return <div className="loading">Loading Dashboard...</div>;
 
@@ -68,6 +94,48 @@ function Dashboard() {
         <StatCard title="Total Departments" value={analytics?.total_departments ?? 0} icon={<FaBuilding />} color="#f59e0b" />
         <StatCard title="Pending Requests" value={analytics?.pending_requests ?? 0} icon={<FaClock />} color="#ef4444" />
       </div>
+
+      {profileCompletion && (
+        <div className="profile-completion-card">
+          {profileCompletion.type === "overview" ? (
+            <>
+              <div>
+                <h4>Company Profile Completion</h4>
+                <p>Average completion across all employees</p>
+              </div>
+              <div className="profile-completion-figures">
+                <span className="big-percentage">{profileCompletion.average}%</span>
+                {profileCompletion.belowThreshold > 0 && (
+                  <span className="below-threshold-pill">
+                    {profileCompletion.belowThreshold} below threshold
+                  </span>
+                )}
+              </div>
+              <a href="/profile-completion" className="view-link">View details</a>
+            </>
+          ) : (
+            <>
+              <div>
+                <h4>Your Profile Completion</h4>
+                <p>
+                  {profileCompletion.percentage === 100
+                    ? "Your profile is fully complete."
+                    : "Complete your profile to improve account readiness."}
+                </p>
+              </div>
+              <div className="profile-completion-figures">
+                <span className="big-percentage">{profileCompletion.percentage}%</span>
+                {profileCompletion.missing?.length > 0 && (
+                  <span className="below-threshold-pill">
+                    {profileCompletion.missing.length} field{profileCompletion.missing.length > 1 ? "s" : ""} missing
+                  </span>
+                )}
+              </div>
+              <a href="/my-profile" className="view-link">Complete profile</a>
+            </>
+          )}
+        </div>
+      )}
 
       <div className="analytics-grid">
         <div className="chart-card">

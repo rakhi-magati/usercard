@@ -15,6 +15,7 @@ from app.models.department_transfer_model import DepartmentTransferHistory
 from app.models.attendance_model import AttendanceRecord
 from app.models.role_request_model import RoleRequest
 from app.models.user_activity_model import UserActivity
+from app.models.profile_completion_settings_model import ProfileCompletionSettings
 
 # Import all routers
 from app.routes.employee_routes import router as employee_router
@@ -25,6 +26,7 @@ from app.routes.reactivation_routes import router as reactivation_router
 from app.routes.notification_routes import router as notification_router
 from app.routes.attendance_routes import router as attendance_router
 from app.routes.user_activity_routes import router as user_activity_router
+from app.routes.profile_completion_routes import router as profile_completion_router
 
 
 app = FastAPI()
@@ -50,6 +52,15 @@ def ensure_existing_sqlite_schema():
             "suspension_reason": "TEXT",
             "suspended_by": "TEXT",
             "suspended_by_email": "TEXT",
+            "first_name": "TEXT",
+            "last_name": "TEXT",
+            "phone_number": "TEXT",
+            "designation": "TEXT",
+            "profile_picture": "TEXT",
+            "address": "TEXT",
+            "employee_code": "TEXT",
+            "profile_completion_score": "INTEGER DEFAULT 0",
+            "profile_completed_at": "TEXT",
         }
         with engine.begin() as connection:
             for column_name, column_type in missing_employee_columns.items():
@@ -78,6 +89,7 @@ app.include_router(reactivation_router)
 app.include_router(notification_router)
 app.include_router(attendance_router)
 app.include_router(user_activity_router)
+app.include_router(profile_completion_router)
 
 
 @app.get("/")

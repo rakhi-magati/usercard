@@ -11,6 +11,8 @@ import {
   FaFileExport,
   FaEnvelope,
   FaCube,
+  FaUserCircle,
+  FaChartBar,
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { recordCurrentUserLogout } from "../../services/activityService";
@@ -56,6 +58,7 @@ function Sidebar({ sidebarCollapsed }) {
         {role === "user" && (
           <>
             <NavLink to="/attendance"><FaCalendarCheck />{!sidebarCollapsed && <span>Attendance</span>}</NavLink>
+            <NavLink to="/my-profile"><FaUserCircle />{!sidebarCollapsed && <span>My Profile</span>}</NavLink>
             <NavLink to="/settings"><FaCog />{!sidebarCollapsed && <span>Settings</span>}</NavLink>
           </>
         )}
@@ -64,6 +67,8 @@ function Sidebar({ sidebarCollapsed }) {
           <>
             <NavLink to="/departments"><FaBuilding />{!sidebarCollapsed && <span>Departments</span>}</NavLink>
             <NavLink to="/attendance"><FaCalendarCheck />{!sidebarCollapsed && <span>Attendance</span>}</NavLink>
+            <NavLink to="/my-profile"><FaUserCircle />{!sidebarCollapsed && <span>My Profile</span>}</NavLink>
+            <NavLink to="/profile-completion"><FaChartBar />{!sidebarCollapsed && <span>Profile Completion</span>}</NavLink>
             <NavLink to="/role-requests"><FaBuilding />{!sidebarCollapsed && <span>Role Request</span>}</NavLink>
             <NavLink to="/audit-logs"><FaHistory />{!sidebarCollapsed && <span>Audit Logs</span>}</NavLink>
             <NavLink to="/tracking"><FaChartLine />{!sidebarCollapsed && <span>Tracking</span>}</NavLink>
