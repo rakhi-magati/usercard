@@ -556,10 +556,10 @@ function Employees() {
                 <td>
                   <span
                     className={`profile-completion-badge ${(employee.profile_completion_score ?? 0) === 100
-                      ? "complete"
-                      : (employee.profile_completion_score ?? 0) < 60
-                        ? "low"
-                        : ""
+                        ? "complete"
+                        : (employee.profile_completion_score ?? 0) < 60
+                          ? "low"
+                          : ""
                       }`}
                   >
                     {employee.profile_completion_score ?? 0}%
@@ -773,8 +773,3 @@ function Employees() {
 }
 
 export default Employees;
-
-
-
-
-

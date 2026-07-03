@@ -23,6 +23,7 @@ import Invitations from "../Pages/Invitations/Invitations";
 import ReactivationRequests from "../Pages/ReactivationRequests/ReactivationRequests";
 import MyProfile from "../Pages/MyProfile/MyProfile";
 import ProfileCompletion from "../Pages/ProfileCompletion/ProfileCompletion";
+import HolidayCalendar from "../Pages/HolidayCalendar/HolidayCalendar";
 
 import ProtectedRoute from "../Components/ProtectedRoute/ProtectedRoute";
 
@@ -61,6 +62,7 @@ function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapse
           <Route path="/reactivation-requests" element={<ProtectedRoute allowedRoles={["admin"]}><ReactivationRequests /></ProtectedRoute>} />
           <Route path="/my-profile" element={<ProtectedRoute allowedRoles={["admin", "user"]}><MyProfile /></ProtectedRoute>} />
           <Route path="/profile-completion" element={<ProtectedRoute allowedRoles={["admin"]}><ProfileCompletion /></ProtectedRoute>} />
+          <Route path="/holidays" element={<ProtectedRoute allowedRoles={["admin", "user"]}><HolidayCalendar /></ProtectedRoute>} />
           <Route path="/data-export" element={<ProtectedRoute allowedRoles={["admin"]}><DataExportCenter /></ProtectedRoute>} />
           <Route path="/tracking" element={<ProtectedRoute allowedRoles={["admin"]}><UserActivity /></ProtectedRoute>} />
           <Route path="/activity" element={<ProtectedRoute allowedRoles={["admin"]}><UserActivity /></ProtectedRoute>} />

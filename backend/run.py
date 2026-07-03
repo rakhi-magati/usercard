@@ -16,6 +16,7 @@ from app.models.attendance_model import AttendanceRecord
 from app.models.role_request_model import RoleRequest
 from app.models.user_activity_model import UserActivity
 from app.models.profile_completion_settings_model import ProfileCompletionSettings
+from app.models.holiday_model import Holiday
 
 # Import all routers
 from app.routes.employee_routes import router as employee_router
@@ -27,6 +28,7 @@ from app.routes.notification_routes import router as notification_router
 from app.routes.attendance_routes import router as attendance_router
 from app.routes.user_activity_routes import router as user_activity_router
 from app.routes.profile_completion_routes import router as profile_completion_router
+from app.routes.holiday_routes import router as holiday_router
 
 
 app = FastAPI()
@@ -90,6 +92,7 @@ app.include_router(notification_router)
 app.include_router(attendance_router)
 app.include_router(user_activity_router)
 app.include_router(profile_completion_router)
+app.include_router(holiday_router)
 
 
 @app.get("/")

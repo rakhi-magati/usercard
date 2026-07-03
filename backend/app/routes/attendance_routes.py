@@ -8,6 +8,7 @@ from app.database import SessionLocal
 from app.models.employee_model import Employee
 from app.models.attendance_model import AttendanceRecord
 from app.services.employee_service import normalize_status, assert_actor_can_access
+from app.services.holiday_service import is_holiday as check_holiday_date
 
 router = APIRouter(
     prefix="/attendance",
@@ -60,7 +61,7 @@ def format_time(value):
         return value
 
 
-def build_attendance_row(employee, attendance_date, record=None):
+def build_attendance_row(employee, attendance_date, record=None, holiday=None):
     return {
         "id": record.id if record else employee.id,
         "employee_id": employee.id,
@@ -68,11 +69,14 @@ def build_attendance_row(employee, attendance_date, record=None):
         "email": employee.email,
         "department": employee.department,
         "date": attendance_date,
-        "status": attendance_status(record, employee.status),
+        "status": "Holiday" if holiday else attendance_status(record, employee.status),
         "employeeStatus": employee_account_status(employee.status),
         "checkIn": format_time(record.check_in) if record else "",
         "checkOut": format_time(record.check_out) if record else "",
         "hours": record.hours if record else "",
+        "is_holiday": bool(holiday),
+        "holiday_name": holiday["name"] if holiday else None,
+        "holiday_type": holiday["holiday_type"] if holiday else None,
     }
 
 
@@ -105,9 +109,13 @@ def get_attendance_rows(company_id=1, attendance_date=None, search=None):
         AttendanceRecord.date == selected_date,
     ).all()
     records_by_employee = {record.employee_id: record for record in records}
+    db.close()
+
+    # Check once per request whether this date is a holiday
+    holiday = check_holiday_date(company_id, selected_date)
 
     rows = [
-        build_attendance_row(employee, selected_date, records_by_employee.get(employee.id))
+        build_attendance_row(employee, selected_date, records_by_employee.get(employee.id), holiday)
         for employee in employees
     ]
 
@@ -120,8 +128,19 @@ def get_attendance_rows(company_id=1, attendance_date=None, search=None):
             or search_text in row["department"].lower()
         ]
 
-    db.close()
     return rows
+
+
+@router.get("/today-status")
+def today_status(company_id: int = 1):
+    today = date.today().isoformat()
+    holiday = check_holiday_date(company_id, today)
+    return {
+        "success": True,
+        "date": today,
+        "is_holiday": holiday is not None,
+        "holiday": holiday,
+    }
 
 
 @router.get("/")
@@ -180,6 +199,14 @@ def check_in(data: dict):
     email = data.get("email")
     attendance_date = data.get("date") or date.today().isoformat()
 
+    # Holiday guard — no check-in on holidays
+    holiday = check_holiday_date(company_id, attendance_date)
+    if holiday:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Today is a holiday ({holiday['name']}). Check-in is not required."
+        )
+
     db = SessionLocal()
     employee = get_employee_by_email(db, email, company_id)
     if not employee:
@@ -227,6 +254,13 @@ def check_out(data: dict):
     company_id = int(data.get("company_id", 1))
     email = data.get("email")
     attendance_date = data.get("date") or date.today().isoformat()
+
+    holiday = check_holiday_date(company_id, attendance_date)
+    if holiday:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Today is a holiday ({holiday['name']}). Check-out is not required."
+        )
 
     db = SessionLocal()
     employee = get_employee_by_email(db, email, company_id)

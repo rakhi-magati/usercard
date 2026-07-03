@@ -1,0 +1,270 @@
+.departments-page {
+  width: min(1200px, 100%);
+  margin: auto;
+  padding: 25px;
+}
+
+.department-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.department-header h1 {
+  font-size: 32px;
+  color: #18233d;
+  margin-bottom: 6px;
+}
+
+.department-header p {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #5a48f5;
+  color: white;
+  border: none;
+  padding: 12px 22px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: .25s;
+}
+
+.add-btn:hover {
+  background: #4737dd;
+}
+
+.department-toolbar {
+  margin-bottom: 28px;
+}
+
+.search-box {
+  width: 320px;
+  position: relative;
+}
+
+.search-box svg {
+  position: absolute;
+  left: 15px;
+  top: 15px;
+  color: gray;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 13px 15px 13px 42px;
+  border-radius: 12px;
+  border: 1px solid #d9dce7;
+  outline: none;
+  font-size: 14px;
+}
+
+.department-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(280px,1fr));
+  gap: 22px;
+}
+
+.department-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  border: 1px solid #ececec;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  transition: .25s;
+  cursor: pointer;
+}
+
+.department-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(0,0,0,.08);
+}
+
+.department-icon {
+  width: 58px;
+  height: 58px;
+  background: #ede9fe;
+  color: #5a48f5;
+  border-radius: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+}
+
+.department-info h3 {
+  margin: 0;
+  color: #18233d;
+  font-size: 18px;
+}
+
+.department-info span {
+  color: gray;
+  font-size: 13px;
+}
+
+.department-footer {
+  margin-top: 35px;
+  display: flex;
+  justify-content: center;
+}
+
+.department-count {
+  background: white;
+  border-radius: 30px;
+  padding: 14px 28px;
+  display: flex;
+  gap: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,.08);
+}
+
+.department-count span {
+  color: gray;
+}
+
+.department-count strong {
+  color: #5a48f5;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  animation: fade .25s;
+}
+
+.department-modal {
+  width: 470px;
+  background: white;
+  border-radius: 22px;
+  overflow: hidden;
+  animation: popup .25s;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  border-bottom: 1px solid #ececec;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #18233d;
+}
+
+.modal-header button {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: #f4f4f4;
+}
+
+.modal-body {
+  padding: 30px;
+}
+
+.modal-body label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.modal-body input {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  border: 1px solid #dadada;
+  outline: none;
+  font-size: 14px;
+}
+
+.modal-body input:focus {
+  border-color: #5a48f5;
+}
+
+.modal-footer {
+  padding: 22px 30px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.cancel-btn {
+  padding: 11px 24px;
+  border-radius: 30px;
+  border: 1px solid #dadada;
+  background: white;
+  cursor: pointer;
+}
+
+.save-btn {
+  padding: 11px 28px;
+  border-radius: 30px;
+  border: none;
+  background: #5a48f5;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.save-btn:hover {
+  background: #4535dc;
+}
+
+@keyframes popup {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media(max-width:768px){
+
+.department-header{
+flex-direction:column;
+align-items:flex-start;
+gap:20px;
+}
+
+.search-box{
+width:100%;
+}
+
+.department-modal{
+width:92%;
+}
+
+.department-grid{
+grid-template-columns:1fr;
+}
+
+}

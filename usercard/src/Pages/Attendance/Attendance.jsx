@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaCalendarAlt, FaDownload, FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
+import { FaCalendarAlt, FaDownload, FaSignInAlt, FaSignOutAlt, FaStar } from "react-icons/fa";
 import {
   checkInAttendance,
   checkOutAttendance,
@@ -7,6 +7,7 @@ import {
   getAttendance,
   getMyAttendance,
 } from "../../services/employeeService";
+import { getTodayAttendanceStatus } from "../../services/holidayService";
 import "./Attendance.css";
 
 const formatDate = (date = new Date()) => date.toISOString().split("T")[0];
@@ -100,6 +101,7 @@ function Attendance() {
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminError, setAdminError] = useState("");
   const [userError, setUserError] = useState("");
+  const [todayHoliday, setTodayHoliday] = useState(null); // {name, holiday_type, ...} or null
 
   const myAccessRequest = accessRequests.find((request) => request.email === userEmail);
   const accessStatus = myAccessRequest?.status || "pending";
@@ -118,6 +120,12 @@ function Attendance() {
   useEffect(() => {
     writeJson(getLeaveKey(companyId), leaveRequests);
   }, [leaveRequests, companyId]);
+
+  useEffect(() => {
+    getTodayAttendanceStatus(parseInt(companyId))
+      .then((res) => { if (res.is_holiday) setTodayHoliday(res.holiday); })
+      .catch(() => {});
+  }, [companyId]);
 
   useEffect(() => {
     if (role !== "user" || myAccessRequest) return;
@@ -197,6 +205,10 @@ function Attendance() {
   }, [adminDate, adminSearch]);
 
   const markAttendance = async (action) => {
+    if (todayHoliday) {
+      setUserError(`Today is a holiday (${todayHoliday.name}). No check-in required.`);
+      return;
+    }
     if (action === "checkIn" && hasCheckedIn) return;
     if (action === "checkOut" && (!hasCheckedIn || hasCheckedOut)) return;
 
@@ -295,6 +307,16 @@ function Attendance() {
 
         {adminError && <div className="attendance-api-error">{adminError}</div>}
 
+        {todayHoliday && adminDate === formatDate() && (
+          <div className="attendance-holiday-banner">
+            <FaStar /> Today is a holiday: <strong>{todayHoliday.name}</strong>
+            {todayHoliday.holiday_type && (
+              <span className="holiday-type-pill">{todayHoliday.holiday_type}</span>
+            )}
+            — Employees are not required to check in today.
+          </div>
+        )}
+
         <section className="admin-attendance-card">
           <div className="attendance-table-wrap">
             <table className="admin-attendance-table">
@@ -314,7 +336,7 @@ function Attendance() {
                   <tr><td colSpan="7">Loading attendance...</td></tr>
                 ) : adminRows.length > 0 ? (
                   adminRows.map((record) => (
-                    <tr key={`${record.employee_id}-${record.date}`}>
+                    <tr key={`${record.employee_id}-${record.date}`} className={record.is_holiday ? "attendance-holiday-row" : ""}>
                       <td>
                         <div className="admin-employee-cell">
                           <span className="admin-avatar">{record.name.charAt(0)}</span>
@@ -326,10 +348,14 @@ function Attendance() {
                       </td>
                       <td>{record.department}</td>
                       <td>{record.date}</td>
-                      <td>{renderStatus(getAttendanceStatus(record))}</td>
-                      <td>{formatTimeValue(getCheckIn(record))}</td>
-                      <td>{formatTimeValue(getCheckOut(record))}</td>
-                      <td>{getHours(record) || "-"}</td>
+                      <td>
+                        {record.is_holiday
+                          ? <span className="attendance-pill holiday" title={record.holiday_name}>Holiday</span>
+                          : renderStatus(getAttendanceStatus(record))}
+                      </td>
+                      <td>{record.is_holiday ? "—" : formatTimeValue(getCheckIn(record))}</td>
+                      <td>{record.is_holiday ? "—" : formatTimeValue(getCheckOut(record))}</td>
+                      <td>{record.is_holiday ? "—" : (getHours(record) || "-")}</td>
                     </tr>
                   ))
                 ) : (
@@ -403,15 +429,38 @@ function Attendance() {
         <section className="attendance-panel">
           <h3><FaCalendarAlt /> Today's Attendance</h3>
           <p className="muted-line">{userName} - {userDepartment}</p>
-          <div className="wide-status">{renderStatus(todayRecord ? getAttendanceStatus(todayRecord) : "Not Checked In")}</div>
-          <p className="muted-line">{todayCheckIn ? `Checked in ${formatTimeValue(todayCheckIn)}` : "Not checked in"}</p>
-          {todayCheckOut && <p className="muted-line">Checked out {formatTimeValue(todayCheckOut)}</p>}
+
+          {todayHoliday ? (
+            <div className="attendance-holiday-banner">
+              <FaStar /> Today is a holiday: <strong>{todayHoliday.name}</strong>
+              {todayHoliday.holiday_type && (
+                <span className="holiday-type-pill">{todayHoliday.holiday_type}</span>
+              )}
+              <br />
+              <small>No check-in or check-out required today.</small>
+            </div>
+          ) : (
+            <>
+              <div className="wide-status">{renderStatus(todayRecord ? getAttendanceStatus(todayRecord) : "Not Checked In")}</div>
+              <p className="muted-line">{todayCheckIn ? `Checked in ${formatTimeValue(todayCheckIn)}` : "Not checked in"}</p>
+              {todayCheckOut && <p className="muted-line">Checked out {formatTimeValue(todayCheckOut)}</p>}
+            </>
+          )}
+
           {userError && <div className="attendance-api-error">{userError}</div>}
           <div className="attendance-button-row">
-            <button className="attendance-primary" onClick={() => markAttendance("checkIn")} disabled={hasCheckedIn}>
+            <button
+              className="attendance-primary"
+              onClick={() => markAttendance("checkIn")}
+              disabled={hasCheckedIn || Boolean(todayHoliday)}
+            >
               <FaSignInAlt /> Check In
             </button>
-            <button className="attendance-secondary" onClick={() => markAttendance("checkOut")} disabled={!hasCheckedIn || hasCheckedOut}>
+            <button
+              className="attendance-secondary"
+              onClick={() => markAttendance("checkOut")}
+              disabled={!hasCheckedIn || hasCheckedOut || Boolean(todayHoliday)}
+            >
               <FaSignOutAlt /> Check Out
             </button>
           </div>
