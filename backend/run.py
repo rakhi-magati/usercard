@@ -17,6 +17,7 @@ from app.models.role_request_model import RoleRequest
 from app.models.user_activity_model import UserActivity
 from app.models.profile_completion_settings_model import ProfileCompletionSettings
 from app.models.holiday_model import Holiday
+from app.models.login_session_model import LoginSession
 
 # Import all routers
 from app.routes.employee_routes import router as employee_router
@@ -29,6 +30,7 @@ from app.routes.attendance_routes import router as attendance_router
 from app.routes.user_activity_routes import router as user_activity_router
 from app.routes.profile_completion_routes import router as profile_completion_router
 from app.routes.holiday_routes import router as holiday_router
+from app.routes.session_routes import router as session_router
 
 
 app = FastAPI()
@@ -70,6 +72,21 @@ def ensure_existing_sqlite_schema():
                     connection.execute(text(f"ALTER TABLE employees ADD COLUMN {column_name} {column_type}"))
             connection.execute(text("UPDATE employees SET status = 'deactivated' WHERE status = 'inactive'"))
 
+    if "audit_logs" in table_names:
+        audit_columns = {column["name"] for column in inspector.get_columns("audit_logs")}
+        missing_audit_columns = {
+            "device_name": "TEXT",
+            "browser": "TEXT",
+            "ip_address": "TEXT",
+            "session_id": "TEXT",
+            "performed_by": "TEXT",
+            "performed_by_email": "TEXT",
+        }
+        with engine.begin() as connection:
+            for column_name, column_type in missing_audit_columns.items():
+                if column_name not in audit_columns:
+                    connection.execute(text(f"ALTER TABLE audit_logs ADD COLUMN {column_name} {column_type}"))
+
 
 ensure_existing_sqlite_schema()
 
@@ -93,6 +110,7 @@ app.include_router(attendance_router)
 app.include_router(user_activity_router)
 app.include_router(profile_completion_router)
 app.include_router(holiday_router)
+app.include_router(session_router)
 
 
 @app.get("/")

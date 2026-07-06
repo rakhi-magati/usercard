@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Navbar from "../Components/Navbar/Navbar";
 import Sidebar from "../Components/Sidebar/Sidebar";
+import { touchSession } from "../services/sessionService";
 import "./DashboardLayout.css";
 
 function DashboardLayout({
@@ -9,6 +11,14 @@ function DashboardLayout({
   sidebarCollapsed,
   setSidebarCollapsed,
 }) {
+
+  useEffect(() => {
+    touchSession();
+    const interval = setInterval(() => {
+      touchSession();
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div

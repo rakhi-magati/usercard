@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from app.database import SessionLocal
 from app.models.audit_log_model import AuditLog
 
@@ -6,8 +7,15 @@ from app.models.audit_log_model import AuditLog
 def create_audit_log(
     user_name,
     action,
-    related_employee,
-    company_id
+    related_employee=None,
+    company_id=None,
+    device_name=None,
+    browser=None,
+    ip_address=None,
+    session_identifier=None,
+    session_id=None,          # optional
+    performed_by=None,
+    performed_by_email=None,
 ):
     db = SessionLocal()
 
@@ -21,7 +29,6 @@ def create_audit_log(
 
     db.add(log)
     db.commit()
-
     db.close()
 
 
@@ -29,6 +36,7 @@ def get_audit_logs(company_id=None):
     db = SessionLocal()
 
     query = db.query(AuditLog)
+
     if company_id is not None:
         query = query.filter(AuditLog.company_id == company_id)
 

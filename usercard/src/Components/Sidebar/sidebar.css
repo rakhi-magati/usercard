@@ -14,7 +14,8 @@
 
   overflow-y: auto;
   overflow-x: hidden;
-  scrollbar-width: thin; /* Firefox */
+  scrollbar-width: thin;
+  /* Firefox */
   scrollbar-color: #6656f5 #111c2e;
 }
 
@@ -75,7 +76,7 @@
   transition: background 0.18s ease, color 0.18s ease;
 }
 
-.sidebar a + a {
+.sidebar a+a {
   margin-top: 6px;
 }
 
@@ -182,4 +183,3 @@ body.dark-theme .sidebar {
   background: #111c2e;
   color: #dbe7f7;
 }
-

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaUsers, FaEnvelope, FaLock, FaEye, FaBuilding } from "react-icons/fa";
 import { COMPANIES, getCompanyName, getUserCompanyId } from "../../constants/companies";
 import { recordLoginActivity } from "../../services/activityService";
+import { startSession } from "../../services/sessionService";
 import { getEmployeeByEmail, syncLoginEmployee } from "../../services/employeeService";
 import "./Login.css";
 
@@ -105,6 +106,11 @@ function Login() {
       localStorage.setItem("company_name", selectedCompanyName);
       ensureAttendanceAccessRequest({ ...loginUser, company_id: companyId, company_name: selectedCompanyName });
       await recordLoginActivity({ ...loginUser, company_id: companyId, company_name: selectedCompanyName }, companyId);
+      try {
+        await startSession({ ...loginUser, company_id: companyId }, companyId);
+      } catch {
+        // best-effort; device/session tracking should not block login
+      }
       if (loginUser.employeeId || loginUser.id) localStorage.setItem("employeeId", loginUser.employeeId || loginUser.id);
 
       if (status === "inactive" || status === "deactivated") {

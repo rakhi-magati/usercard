@@ -125,9 +125,9 @@ td {
 }
 
 @media (max-width: 760px) {
+
   .main-section,
   .main-section.collapsed {
     margin-left: 72px;
   }
 }
-
