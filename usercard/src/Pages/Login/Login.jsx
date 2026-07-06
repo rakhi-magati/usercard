@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { FaUsers, FaEnvelope, FaLock, FaEye, FaBuilding } from "react-icons/fa";
 import { COMPANIES, getCompanyName, getUserCompanyId } from "../../constants/companies";
 import { recordLoginActivity } from "../../services/activityService";
@@ -60,9 +60,22 @@ const ensureAttendanceAccessRequest = (user) => {
 
 function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyId, setCompanyId] = useState("1");
+
+  const sessionEndedReason = location.state?.sessionEnded ? location.state?.reason : null;
+  const sessionEndedMessage =
+    sessionEndedReason === "Force Logout"
+      ? "You were logged out by an administrator."
+      : sessionEndedReason === "Revoked"
+      ? "Your session was revoked by an administrator. Please sign in again."
+      : sessionEndedReason === "Session Expired"
+      ? "Your session expired due to inactivity. Please sign in again."
+      : sessionEndedReason
+      ? "Your session has ended. Please sign in again."
+      : null;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -133,6 +146,12 @@ function Login() {
           <div className="login-icon"><FaUsers /></div>
           <h2>Welcome Back!</h2>
           <p>Login to your company account</p>
+
+          {sessionEndedMessage && (
+            <div className="login-session-ended-banner" role="alert">
+              {sessionEndedMessage}
+            </div>
+          )}
 
           <div className="login-company-options" role="radiogroup" aria-label="Company selection">
             {COMPANIES.map((company) => (

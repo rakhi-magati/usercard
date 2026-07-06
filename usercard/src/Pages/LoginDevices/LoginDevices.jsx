@@ -23,6 +23,8 @@ import {
   logoutAllOtherDevices,
   forceLogoutDevice,
   revokeSessions,
+  approveRevokeRequest,
+  rejectRevokeRequest,
 } from "../../services/sessionService";
 import "./LoginDevices.css";
 
@@ -182,18 +184,36 @@ function LoginDevices() {
     }
   };
 
+  const handleReviewRevoke = async (session, action) => {
+    const verb = action === "approve" ? "Approve" : "Reject";
+    if (!window.confirm(`${verb} the revoke request for ${session.user_name}'s "${session.device_name}"?`)) return;
+    try {
+      if (action === "approve") {
+        await approveRevokeRequest(session.id, companyId);
+      } else {
+        await rejectRevokeRequest(session.id, companyId);
+      }
+      loadCompanySessions();
+    } catch (err) {
+      alert(err.response?.data?.detail || `Could not ${action} revoke request`);
+    }
+  };
+
   const handleRevokeSelected = async () => {
     if (!selectedIds.length) return;
-    if (!window.confirm(`Revoke ${selectedIds.length} selected session(s)?`)) return;
+    if (!window.confirm(`Request revoke for ${selectedIds.length} selected session(s)? This will send the request to admins for approval and immediately blocks attendance access for the affected user(s).`)) return;
     try {
       const result = await revokeSessions(selectedIds, companyId);
       if (result.skipped?.length) {
-        alert(`${result.skipped.length} session(s) could not be revoked (already revoked or expired).`);
+        alert(`${result.skipped.length} session(s) could not be requested for revoke (already revoked, expired, or already pending approval).`);
+      }
+      if (result.requested?.length) {
+        alert(`Revoke request sent for ${result.requested.length} session(s). Attendance access is blocked immediately; the session itself will be revoked once an admin approves the request.`);
       }
       setSelectedIds([]);
       loadCompanySessions();
     } catch (err) {
-      alert(err.response?.data?.detail || "Could not revoke sessions");
+      alert(err.response?.data?.detail || "Could not request session revoke");
     }
   };
 
@@ -369,9 +389,13 @@ function LoginDevices() {
                 {companySessions.length ? companySessions.map((session) => (
                   <tr key={session.id}>
                     <td>
-                      <button className="trust-toggle" onClick={() => toggleSelected(session.id)}>
-                        {selectedIds.includes(session.id) ? <FaCheckSquare /> : <FaSquare />}
-                      </button>
+                      {session.revoke_status === "Pending" ? (
+                        <span title="Revoke already requested, awaiting approval">-</span>
+                      ) : (
+                        <button className="trust-toggle" onClick={() => toggleSelected(session.id)}>
+                          {selectedIds.includes(session.id) ? <FaCheckSquare /> : <FaSquare />}
+                        </button>
+                      )}
                     </td>
                     <td>
                       <div className="device-cell">
@@ -387,14 +411,31 @@ function LoginDevices() {
                     <td>{session.ip_address}</td>
                     <td>{formatDateTime(session.login_time)}</td>
                     <td>{formatDateTime(session.last_activity_time)}</td>
-                    <td><span className={`status-badge ${normalize(session.status).replace(" ", "-")}`}>{session.status}</span></td>
+                    <td>
+                      <span className={`status-badge ${normalize(session.status).replace(" ", "-")}`}>{session.status}</span>
+                      {session.revoke_status === "Pending" && (
+                        <span className="status-badge pending-revoke" title={`Requested by ${session.revoke_requested_by || "an admin"}`}>
+                          Revoke Pending Approval
+                        </span>
+                      )}
+                    </td>
                     <td>{session.termination_reason || "-"}</td>
                     <td>
                       <div className="devices-actions">
-                        {session.status === "Active" && (
+                        {session.status === "Active" && !session.revoke_status && (
                           <button title="Force logout" onClick={() => handleForceLogout(session)}>
                             <FaSignOutAlt />
                           </button>
+                        )}
+                        {session.revoke_status === "Pending" && (
+                          <>
+                            <button title="Approve revoke" onClick={() => handleReviewRevoke(session, "approve")}>
+                              <FaCheckSquare />
+                            </button>
+                            <button title="Reject revoke" onClick={() => handleReviewRevoke(session, "reject")}>
+                              <FaBan />
+                            </button>
+                          </>
                         )}
                       </div>
                     </td>

@@ -8,6 +8,7 @@ import {
   getMyAttendance,
 } from "../../services/employeeService";
 import { getTodayAttendanceStatus } from "../../services/holidayService";
+import { getAttendanceAccessStatus } from "../../services/sessionService";
 import "./Attendance.css";
 
 const formatDate = (date = new Date()) => date.toISOString().split("T")[0];
@@ -102,6 +103,7 @@ function Attendance() {
   const [adminError, setAdminError] = useState("");
   const [userError, setUserError] = useState("");
   const [todayHoliday, setTodayHoliday] = useState(null); // {name, holiday_type, ...} or null
+  const [attendanceBlocked, setAttendanceBlocked] = useState(false);
 
   const myAccessRequest = accessRequests.find((request) => request.email === userEmail);
   const accessStatus = myAccessRequest?.status || "pending";
@@ -204,7 +206,28 @@ function Attendance() {
     setAdminPage(1);
   }, [adminDate, adminSearch]);
 
+  useEffect(() => {
+    if (role === "admin") return;
+
+    let cancelled = false;
+    const checkAccess = async () => {
+      const result = await getAttendanceAccessStatus(userEmail, companyId);
+      if (!cancelled) setAttendanceBlocked(Boolean(result?.blocked));
+    };
+
+    checkAccess();
+    const interval = setInterval(checkAccess, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, [role, userEmail, companyId]);
+
   const markAttendance = async (action) => {
+    if (attendanceBlocked) {
+      setUserError("Your attendance access has been revoked by an administrator.");
+      return;
+    }
     if (todayHoliday) {
       setUserError(`Today is a holiday (${todayHoliday.name}). No check-in required.`);
       return;
@@ -447,19 +470,25 @@ function Attendance() {
             </>
           )}
 
+          {attendanceBlocked && (
+            <div className="attendance-api-error" role="alert">
+              Your attendance access has been revoked by an administrator. Contact your admin if you believe this is a mistake.
+            </div>
+          )}
+
           {userError && <div className="attendance-api-error">{userError}</div>}
           <div className="attendance-button-row">
             <button
               className="attendance-primary"
               onClick={() => markAttendance("checkIn")}
-              disabled={hasCheckedIn || Boolean(todayHoliday)}
+              disabled={hasCheckedIn || Boolean(todayHoliday) || attendanceBlocked}
             >
               <FaSignInAlt /> Check In
             </button>
             <button
               className="attendance-secondary"
               onClick={() => markAttendance("checkOut")}
-              disabled={!hasCheckedIn || hasCheckedOut || Boolean(todayHoliday)}
+              disabled={!hasCheckedIn || hasCheckedOut || Boolean(todayHoliday) || attendanceBlocked}
             >
               <FaSignOutAlt /> Check Out
             </button>

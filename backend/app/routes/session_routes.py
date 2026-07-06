@@ -116,10 +116,41 @@ def revoke_sessions(data: dict):
     if not session_ids:
         raise HTTPException(status_code=400, detail="session_ids is required")
 
-    result = session_service.revoke_sessions(
+    result = session_service.request_revoke_sessions(
         session_ids,
         int(data.get("company_id") or 1),
         data.get("actor_email"),
         data.get("actor_name"),
     )
     return {"success": True, "data": result}
+
+
+@router.post("/sessions/{session_id}/revoke/approve")
+def approve_revoke(session_id: int, data: dict):
+    result = session_service.review_revoke_request(
+        session_id,
+        "approved",
+        int(data.get("company_id") or 1),
+        data.get("actor_email"),
+        data.get("actor_name"),
+    )
+    return {"success": True, "data": result}
+
+
+@router.post("/sessions/{session_id}/revoke/reject")
+def reject_revoke(session_id: int, data: dict):
+    result = session_service.review_revoke_request(
+        session_id,
+        "rejected",
+        int(data.get("company_id") or 1),
+        data.get("actor_email"),
+        data.get("actor_name"),
+    )
+    return {"success": True, "data": result}
+
+
+@router.get("/sessions/attendance-access-status")
+def attendance_access_status(company_id: int = 1, email: str = None):
+    if not email:
+        raise HTTPException(status_code=400, detail="email is required")
+    return {"success": True, "data": session_service.is_attendance_access_blocked(company_id, email)}

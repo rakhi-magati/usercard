@@ -5,6 +5,7 @@ from fastapi import HTTPException
 from datetime import datetime
 from app.database import SessionLocal
 from app.models.login_session_model import LoginSession
+from app.models.notification_model import Notification
 from app.services.audit_service import create_audit_log
 from app.services.employee_service import assert_actor_can_access, assert_admin
 
@@ -19,6 +20,10 @@ REASON_USER_LOGOUT = "User Logout"
 REASON_FORCE_LOGOUT = "Force Logout"
 REASON_SESSION_EXPIRED = "Session Expired"
 REASON_REVOKED = "Revoked"
+
+REVOKE_PENDING = "Pending"
+REVOKE_APPROVED = "Approved"
+REVOKE_REJECTED = "Rejected"
 
 
 def _now():
@@ -376,14 +381,21 @@ def force_logout(session_id, company_id, admin_email, admin_name=None):
     return result
 
 
-def revoke_sessions(session_ids, company_id, admin_email, admin_name=None):
+def request_revoke_sessions(session_ids, company_id, admin_email, admin_name=None):
+    """Admin-initiated revoke now requires another admin's approval to finalize.
+
+    The targeted user loses attendance access immediately (see
+    is_attendance_access_blocked), but the session itself stays Active until
+    the request is approved or rejected.
+    """
     db = SessionLocal()
     actor = assert_actor_can_access(db, company_id, admin_email)
     assert_admin(actor)
 
     performed_by = admin_name or actor.name
+    requested_at = _now()
 
-    revoked = []
+    requested = []
     skipped = []
 
     for session_id in session_ids:
@@ -400,15 +412,108 @@ def revoke_sessions(session_ids, company_id, admin_email, admin_name=None):
             skipped.append({"id": session_id, "reason": f"Already {session.status.lower()}"})
             continue
 
+        if session.revoke_status == REVOKE_PENDING:
+            skipped.append({"id": session_id, "reason": "Revoke already pending approval"})
+            continue
+
+        session.revoke_status = REVOKE_PENDING
+        session.revoke_requested_by = performed_by
+        session.revoke_requested_by_email = admin_email
+        session.revoke_requested_at = requested_at
+
+        _log(session, "Session Revoke Requested", company_id, performed_by=performed_by, performed_by_email=admin_email)
+
+        notif = Notification(
+            company_id=company_id,
+            recipient_role="admin",
+            message=f"{performed_by} requested to revoke {session.user_name}'s session on {session.device_name}.",
+            type="session_revoke_request",
+            related_id=session.id,
+            is_read=False,
+            created_at=requested_at,
+        )
+        db.add(notif)
+
+        requested.append(session.id)
+
+    db.commit()
+    db.close()
+    return {"requested": requested, "skipped": skipped}
+
+
+def review_revoke_request(session_id, action, company_id, admin_email, admin_name=None):
+    """action is 'approved' or 'rejected'."""
+    db = SessionLocal()
+    actor = assert_actor_can_access(db, company_id, admin_email)
+    assert_admin(actor)
+
+    session = db.query(LoginSession).filter(
+        LoginSession.id == session_id,
+        LoginSession.company_id == company_id,
+    ).first()
+
+    if not session:
+        db.close()
+        raise HTTPException(status_code=404, detail="Device session not found")
+
+    if session.revoke_status != REVOKE_PENDING:
+        db.close()
+        raise HTTPException(status_code=400, detail="This revoke request has already been reviewed")
+
+    performed_by = admin_name or actor.name
+    reviewed_at = _now()
+
+    session.revoke_reviewed_by = performed_by
+    session.revoke_reviewed_by_email = admin_email
+    session.revoke_reviewed_at = reviewed_at
+
+    if action == "approved":
+        session.revoke_status = REVOKE_APPROVED
         session.status = REVOKED
         session.termination_reason = REASON_REVOKED
         session.terminated_by = performed_by
         session.terminated_by_email = admin_email
-        session.logout_time = _now()
-
+        session.logout_time = reviewed_at
         _log(session, "Session Revoked", company_id, performed_by=performed_by, performed_by_email=admin_email)
-        revoked.append(session.id)
+        message = f"{performed_by} approved revoking {session.user_name}'s session on {session.device_name}."
+    else:
+        session.revoke_status = REVOKE_REJECTED
+        _log(session, "Session Revoke Rejected", company_id, performed_by=performed_by, performed_by_email=admin_email)
+        message = f"{performed_by} rejected the request to revoke {session.user_name}'s session on {session.device_name}. Access has been restored."
+
+    notif = Notification(
+        company_id=company_id,
+        recipient_role="admin",
+        message=message,
+        type=f"session_revoke_{action}",
+        related_id=session.id,
+        is_read=False,
+        created_at=reviewed_at,
+    )
+    db.add(notif)
 
     db.commit()
+    db.refresh(session)
+
+    result = session.to_dict()
     db.close()
-    return {"revoked": revoked, "skipped": skipped}
+    return result
+
+
+def is_attendance_access_blocked(company_id, email):
+    """A user loses attendance access as soon as a revoke is requested for
+    any of their sessions, and stays blocked once it's approved. A rejected
+    request restores access."""
+    db = SessionLocal()
+    blocking_session = db.query(LoginSession).filter(
+        LoginSession.company_id == company_id,
+        LoginSession.user_email == email,
+        LoginSession.revoke_status.in_([REVOKE_PENDING, REVOKE_APPROVED]),
+    ).order_by(LoginSession.revoke_requested_at.desc()).first()
+
+    result = {
+        "blocked": bool(blocking_session),
+        "status": blocking_session.revoke_status if blocking_session else None,
+    }
+    db.close()
+    return result

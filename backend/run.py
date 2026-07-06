@@ -87,6 +87,22 @@ def ensure_existing_sqlite_schema():
                 if column_name not in audit_columns:
                     connection.execute(text(f"ALTER TABLE audit_logs ADD COLUMN {column_name} {column_type}"))
 
+    if "login_sessions" in table_names:
+        login_session_columns = {column["name"] for column in inspector.get_columns("login_sessions")}
+        missing_login_session_columns = {
+            "revoke_status": "TEXT",
+            "revoke_requested_by": "TEXT",
+            "revoke_requested_by_email": "TEXT",
+            "revoke_requested_at": "TEXT",
+            "revoke_reviewed_by": "TEXT",
+            "revoke_reviewed_by_email": "TEXT",
+            "revoke_reviewed_at": "TEXT",
+        }
+        with engine.begin() as connection:
+            for column_name, column_type in missing_login_session_columns.items():
+                if column_name not in login_session_columns:
+                    connection.execute(text(f"ALTER TABLE login_sessions ADD COLUMN {column_name} {column_type}"))
+
 
 ensure_existing_sqlite_schema()
 

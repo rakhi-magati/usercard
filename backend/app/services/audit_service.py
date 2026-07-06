@@ -25,6 +25,12 @@ def create_audit_log(
         related_employee=related_employee,
         company_id=company_id,
         timestamp=datetime.now().isoformat(),
+        device_name=device_name,
+        browser=browser,
+        ip_address=ip_address,
+        session_id=session_id or session_identifier,
+        performed_by=performed_by,
+        performed_by_email=performed_by_email,
     )
 
     db.add(log)

@@ -205,3 +205,33 @@ export const revokeSessions = async (sessionIds, companyId = getCompanyId()) => 
   });
   return response.data.data;
 };
+
+export const approveRevokeRequest = async (sessionId, companyId = getCompanyId()) => {
+  const response = await axios.post(`${SESSIONS_API}/${sessionId}/revoke/approve`, {
+    company_id: companyId,
+    actor_email: getActorEmail(),
+    actor_name: getActorName(),
+  });
+  return response.data.data;
+};
+
+export const rejectRevokeRequest = async (sessionId, companyId = getCompanyId()) => {
+  const response = await axios.post(`${SESSIONS_API}/${sessionId}/revoke/reject`, {
+    company_id: companyId,
+    actor_email: getActorEmail(),
+    actor_name: getActorName(),
+  });
+  return response.data.data;
+};
+
+export const getAttendanceAccessStatus = async (email = getActorEmail(), companyId = getCompanyId()) => {
+  if (!email) return { blocked: false, status: null };
+  try {
+    const response = await axios.get(`${SESSIONS_API}/attendance-access-status`, {
+      params: { company_id: companyId, email },
+    });
+    return response.data.data;
+  } catch {
+    return { blocked: false, status: null };
+  }
+};

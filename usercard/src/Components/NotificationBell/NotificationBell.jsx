@@ -5,6 +5,7 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
 } from "../../services/employeeService";
+import { approveRevokeRequest, rejectRevokeRequest } from "../../services/sessionService";
 import "./NotificationBell.css";
 
 const readJson = (key, fallback) => {
@@ -105,7 +106,7 @@ function NotificationBell() {
   }, []);
 
   const handleRead = async (notification) => {
-    if (notification.type === "attendance_access") return;
+    if (notification.type === "attendance_access" || notification.type === "session_revoke_request") return;
 
     if (String(notification.id).startsWith("local-") || String(notification.id).startsWith("department-transfer-")) {
       const localItems = readJson(notificationKey, []);
@@ -171,6 +172,20 @@ function NotificationBell() {
     fetchNotifications();
   };
 
+  const reviewSessionRevoke = async (notification, action) => {
+    try {
+      if (action === "approved") {
+        await approveRevokeRequest(notification.related_id);
+      } else {
+        await rejectRevokeRequest(notification.related_id);
+      }
+      await markNotificationRead(notification.id);
+    } catch (err) {
+      alert(err.response?.data?.detail || `Could not ${action === "approved" ? "approve" : "reject"} the revoke request`);
+    }
+    fetchNotifications();
+  };
+
   return (
     <div className="notif-wrapper" ref={ref}>
       <button className="notif-bell" onClick={() => setOpen(!open)}>
@@ -210,7 +225,13 @@ function NotificationBell() {
                       <button className="danger" onClick={() => reviewAttendanceAccess(notification.request_id, "rejected")}>Reject</button>
                     </div>
                   )}
-                  {!notification.is_read && notification.type !== "attendance_access" && <FaCheck className="notif-check" />}
+                  {role === "admin" && notification.type === "session_revoke_request" && (
+                    <div className="notif-actions" onClick={(event) => event.stopPropagation()}>
+                      <button onClick={() => reviewSessionRevoke(notification, "approved")}>Approve</button>
+                      <button className="danger" onClick={() => reviewSessionRevoke(notification, "rejected")}>Reject</button>
+                    </div>
+                  )}
+                  {!notification.is_read && notification.type !== "attendance_access" && notification.type !== "session_revoke_request" && <FaCheck className="notif-check" />}
                 </div>
               ))
             )}

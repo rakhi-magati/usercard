@@ -34,6 +34,15 @@ class LoginSession(Base):
     terminated_by = Column(String)
     terminated_by_email = Column(String)
 
+    # Revoke approval workflow: None / Pending / Approved / Rejected
+    revoke_status = Column(String)
+    revoke_requested_by = Column(String)
+    revoke_requested_by_email = Column(String)
+    revoke_requested_at = Column(String)
+    revoke_reviewed_by = Column(String)
+    revoke_reviewed_by_email = Column(String)
+    revoke_reviewed_at = Column(String)
+
     def to_dict(self):
         return {
             "id": self.id,
@@ -54,4 +63,11 @@ class LoginSession(Base):
             "termination_reason": self.termination_reason,
             "terminated_by": self.terminated_by,
             "terminated_by_email": self.terminated_by_email,
+            "revoke_status": self.revoke_status,
+            "revoke_requested_by": self.revoke_requested_by,
+            "revoke_requested_by_email": self.revoke_requested_by_email,
+            "revoke_requested_at": self.revoke_requested_at,
+            "revoke_reviewed_by": self.revoke_reviewed_by,
+            "revoke_reviewed_by_email": self.revoke_reviewed_by_email,
+            "revoke_reviewed_at": self.revoke_reviewed_at,
         }
