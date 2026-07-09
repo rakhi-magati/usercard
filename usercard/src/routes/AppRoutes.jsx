@@ -25,6 +25,7 @@ import MyProfile from "../Pages/MyProfile/MyProfile";
 import ProfileCompletion from "../Pages/ProfileCompletion/ProfileCompletion";
 import HolidayCalendar from "../Pages/HolidayCalendar/HolidayCalendar";
 import LoginDevices from "../Pages/LoginDevices/LoginDevices";
+import AdminSessions from "../Pages/AdminSessions/AdminSessions";
 
 import ProtectedRoute from "../Components/ProtectedRoute/ProtectedRoute";
 
@@ -69,6 +70,7 @@ function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapse
           <Route path="/activity" element={<ProtectedRoute allowedRoles={["admin"]}><UserActivity /></ProtectedRoute>} />
           <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={["admin"]}><AuditLogs /></ProtectedRoute>} />
           <Route path="/login-devices" element={<ProtectedRoute allowedRoles={["admin", "user"]}><LoginDevices /></ProtectedRoute>} />
+          <Route path="/session-monitoring" element={<ProtectedRoute allowedRoles={["admin"]}><AdminSessions /></ProtectedRoute>} />
         </Route>
       </Routes>
     </BrowserRouter>

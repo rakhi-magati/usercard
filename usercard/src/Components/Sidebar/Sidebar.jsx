@@ -15,6 +15,7 @@ import {
   FaChartBar,
   FaCalendarAlt,
   FaShieldAlt,
+  FaUserClock,
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
 import { recordCurrentUserLogout } from "../../services/activityService";
@@ -83,6 +84,7 @@ function Sidebar({ sidebarCollapsed }) {
             <NavLink to="/profile-completion"><FaChartBar />{!sidebarCollapsed && <span>Profile Completion</span>}</NavLink>
             {/* <NavLink to="/role-requests"><FaBuilding />{!sidebarCollapsed && <span>Role Request</span>}</NavLink> */}
             <NavLink to="/login-devices"><FaShieldAlt />{!sidebarCollapsed && <span>Login Devices</span>}</NavLink>
+            <NavLink to="/session-monitoring"><FaUserClock />{!sidebarCollapsed && <span>Session Monitoring</span>}</NavLink>
             <NavLink to="/audit-logs"><FaHistory />{!sidebarCollapsed && <span>Audit Logs</span>}</NavLink>
             <NavLink to="/tracking"><FaChartLine />{!sidebarCollapsed && <span>Tracking</span>}</NavLink>
             <NavLink to="/data-export"><FaFileExport />{!sidebarCollapsed && <span>Data Export Center</span>}</NavLink>

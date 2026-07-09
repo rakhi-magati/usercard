@@ -384,8 +384,8 @@ def force_logout(session_id, company_id, admin_email, admin_name=None):
 def request_revoke_sessions(session_ids, company_id, admin_email, admin_name=None):
     """Admin-initiated revoke now requires another admin's approval to finalize.
 
-    The targeted user loses attendance access immediately (see
-    is_attendance_access_blocked), but the session itself stays Active until
+    Requesting a revoke only notifies the admins; it does not affect the
+    targeted user's attendance access. The session itself stays Active until
     the request is approved or rejected.
     """
     db = SessionLocal()
@@ -501,19 +501,7 @@ def review_revoke_request(session_id, action, company_id, admin_email, admin_nam
 
 
 def is_attendance_access_blocked(company_id, email):
-    """A user loses attendance access as soon as a revoke is requested for
-    any of their sessions, and stays blocked once it's approved. A rejected
-    request restores access."""
-    db = SessionLocal()
-    blocking_session = db.query(LoginSession).filter(
-        LoginSession.company_id == company_id,
-        LoginSession.user_email == email,
-        LoginSession.revoke_status.in_([REVOKE_PENDING, REVOKE_APPROVED]),
-    ).order_by(LoginSession.revoke_requested_at.desc()).first()
-
-    result = {
-        "blocked": bool(blocking_session),
-        "status": blocking_session.revoke_status if blocking_session else None,
-    }
-    db.close()
-    return result
+    """Session revocation (requested or approved) no longer affects the
+    user's attendance access in any way - it only generates admin
+    notifications (see request_revoke_sessions / review_revoke_request)."""
+    return {"blocked": False, "status": None}
