@@ -18,6 +18,8 @@ from app.models.user_activity_model import UserActivity
 from app.models.profile_completion_settings_model import ProfileCompletionSettings
 from app.models.holiday_model import Holiday
 from app.models.login_session_model import LoginSession
+from app.models.employee_skill_model import EmployeeSkill
+from app.models.employee_certification_model import EmployeeCertification
 
 # Import all routers
 from app.routes.employee_routes import router as employee_router
@@ -31,6 +33,7 @@ from app.routes.user_activity_routes import router as user_activity_router
 from app.routes.profile_completion_routes import router as profile_completion_router
 from app.routes.holiday_routes import router as holiday_router
 from app.routes.session_routes import router as session_router
+from app.routes.skills_routes import router as skills_router
 
 
 app = FastAPI()
@@ -127,12 +130,17 @@ app.include_router(user_activity_router)
 app.include_router(profile_completion_router)
 app.include_router(holiday_router)
 app.include_router(session_router)
+app.include_router(skills_router)
+
+# Serve uploaded certification documents
+import os
+from fastapi.staticfiles import StaticFiles
+
+UPLOADS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "uploads")
+os.makedirs(UPLOADS_DIR, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 
 @app.get("/")
 def home():
     return {"message": "Employee API Running"}
-
-
-
-

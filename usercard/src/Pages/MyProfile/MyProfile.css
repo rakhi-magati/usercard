@@ -185,8 +185,41 @@
 }
 
 @media (max-width: 640px) {
+
     .form-grid,
     .missing-fields ul {
         grid-template-columns: 1fr;
+    }
+}
+
+.skills-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 14px 0;
+}
+
+.skills-summary-grid>div {
+    text-align: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px;
+}
+
+.skills-summary-grid strong {
+    display: block;
+    font-size: 18px;
+    color: #2563eb;
+}
+
+.skills-summary-grid span {
+    font-size: 11px;
+    color: #64748b;
+}
+
+@media (max-width: 640px) {
+    .skills-summary-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }

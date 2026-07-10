@@ -28,6 +28,7 @@ import LoginDevices from "../Pages/LoginDevices/LoginDevices";
 import AdminSessions from "../Pages/AdminSessions/AdminSessions";
 
 import ProtectedRoute from "../Components/ProtectedRoute/ProtectedRoute";
+import SkillsCertifications from "../Pages/SkillsCertifications/SkillsCertifications";
 
 function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapsed }) {
   return (
@@ -70,7 +71,9 @@ function AppRoutes({ darkMode, setDarkMode, sidebarCollapsed, setSidebarCollapse
           <Route path="/activity" element={<ProtectedRoute allowedRoles={["admin"]}><UserActivity /></ProtectedRoute>} />
           <Route path="/audit-logs" element={<ProtectedRoute allowedRoles={["admin"]}><AuditLogs /></ProtectedRoute>} />
           <Route path="/login-devices" element={<ProtectedRoute allowedRoles={["admin", "user"]}><LoginDevices /></ProtectedRoute>} />
-          <Route path="/session-monitoring" element={<ProtectedRoute allowedRoles={["admin"]}><AdminSessions /></ProtectedRoute>} />
+          <Route path="/session-monitor" element={<ProtectedRoute allowedRoles={["admin"]}><AdminSessions /></ProtectedRoute>} />
+          <Route path="/skills-certifications" element={<ProtectedRoute allowedRoles={["admin", "user"]}><SkillsCertifications /></ProtectedRoute>} />
+
         </Route>
       </Routes>
     </BrowserRouter>

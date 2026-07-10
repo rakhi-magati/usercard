@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import { FaUserCircle, FaSave, FaExclamationCircle } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FaUserCircle, FaSave, FaExclamationCircle, FaGraduationCap } from "react-icons/fa";
 import {
   getMyProfileCompletion,
   updateMyProfile,
 } from "../../services/employeeService";
+import { getCompetencySummary } from "../../services/skillsService";
 import "./MyProfile.css";
 
 const getCompanyId = () => parseInt(localStorage.getItem("company_id") || "1");
@@ -25,6 +27,7 @@ function MyProfile() {
   const companyId = getCompanyId();
 
   const [completion, setCompletion] = useState(null);
+  const [competency, setCompetency] = useState(null);
   const [formData, setFormData] = useState(emptyForm);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -45,8 +48,19 @@ function MyProfile() {
     }
   };
 
+  const fetchCompetency = async () => {
+    if (!employeeId) return;
+    try {
+      const data = await getCompetencySummary(employeeId, companyId);
+      setCompetency(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     fetchCompletion();
+    fetchCompetency();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -133,6 +147,26 @@ function MyProfile() {
           </div>
         )}
       </div>
+
+      {competency && (
+        <div className="completion-card">
+          <div className="completion-summary">
+            <div className="completion-percentage">
+              <FaGraduationCap /> Skills &amp; Certifications
+            </div>
+          </div>
+          <div className="skills-summary-grid">
+            <div><strong>{competency.total_skills}</strong><span>Total Skills</span></div>
+            <div><strong>{competency.primary_skills}</strong><span>Primary Skills</span></div>
+            <div><strong>{competency.active_certifications}</strong><span>Active Certifications</span></div>
+            <div><strong>{competency.expired_certifications}</strong><span>Expired Certifications</span></div>
+            <div><strong>+{competency.profile_completion_contribution}%</strong><span>Completion Contribution</span></div>
+          </div>
+          <p className="completion-recommendation">
+            <Link to="/skills-certifications">Manage your skills and certifications &rarr;</Link>
+          </p>
+        </div>
+      )}
 
       <form className="profile-form" onSubmit={handleSubmit}>
         <h3>Complete Your Details</h3>
