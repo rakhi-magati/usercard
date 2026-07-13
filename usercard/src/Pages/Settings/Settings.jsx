@@ -1,14 +1,15 @@
 ﻿import { useMemo, useState } from "react";
 import {
-  FaBell,
   FaCheck,
-  FaLaptop,
-  FaLock,
   FaMoon,
   FaShieldAlt,
-  FaUser,
+  FaUserClock,
+  FaGraduationCap,
 } from "react-icons/fa";
 import { COMPANIES, getCompanyName } from "../../constants/companies";
+import LoginDevices from "../LoginDevices/LoginDevices";
+import AdminSessions from "../AdminSessions/AdminSessions";
+import SkillsCertifications from "../SkillsCertifications/SkillsCertifications";
 import "./Settings.css";
 
 const readJson = (key, fallback) => {
@@ -301,96 +302,71 @@ function Settings({ darkMode, setDarkMode }) {
     </div>
   );
 
+  const renderLoginDevices = () => (
+    <div className="settings-content-section embedded-tab-section">
+      <LoginDevices />
+    </div>
+  );
+
+  const renderSkills = () => (
+    <div className="settings-content-section embedded-tab-section">
+      <SkillsCertifications />
+    </div>
+  );
+
+  const renderUserSessions = () => (
+    <div className="settings-content-section embedded-tab-section">
+      <AdminSessions />
+    </div>
+  );
+
   const renderTabContent = () => {
     if (activeTab === "profile") return renderProfile();
     if (activeTab === "security") return renderSecurity();
     if (activeTab === "appearance") return renderAppearance();
     if (activeTab === "notifications") return renderNotifications();
+    if (activeTab === "login-devices") return renderLoginDevices();
+    if (activeTab === "skills") return renderSkills();
+    if (activeTab === "sessions") return renderUserSessions();
     return renderApprovals();
   };
 
-  if (isAdmin) {
-    const tabs = [
-      { id: "profile", label: "Profile", icon: "P" },
-      { id: "security", label: "Security", icon: "S" },
-      { id: "appearance", label: "Appearance", icon: "A" },
-      { id: "notifications", label: "Notifications", icon: "N" },
-      { id: "approvals", label: "Approvals", icon: <FaCheck /> },
-    ];
-
-    return (
-      <div className="settings-page admin-settings-page">
-        <div className="admin-settings-header">
-          <h1>Settings</h1>
-          <p>Manage your account preferences and system configuration.</p>
-        </div>
-
-        <div className="admin-settings-shell">
-          <aside className="settings-tabs">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                className={activeTab === tab.id ? "active" : ""}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <span>{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
-          </aside>
-          <main className="settings-main-panel">{renderTabContent()}</main>
-        </div>
-      </div>
-    );
-  }
+  const tabs = [
+    { id: "profile", label: "Profile", icon: "P" },
+    { id: "security", label: "Security", icon: "S" },
+    { id: "appearance", label: "Appearance", icon: "A" },
+    { id: "notifications", label: "Notifications", icon: "N" },
+    { id: "login-devices", label: "Login Devices", icon: <FaShieldAlt /> },
+    { id: "skills", label: "Skills & Certifications", icon: <FaGraduationCap /> },
+    ...(isAdmin
+      ? [
+          { id: "sessions", label: "User Sessions", icon: <FaUserClock /> },
+          { id: "approvals", label: "Approvals", icon: <FaCheck /> },
+        ]
+      : []),
+  ];
 
   return (
-    <div className="settings-page">
-      <div className="settings-header">
+    <div className="settings-page admin-settings-page">
+      <div className="admin-settings-header">
         <h1>Settings</h1>
         <p>Manage your account preferences and system configuration.</p>
       </div>
 
-      <div className="settings-grid">
-        <div className="settings-card">
-          <div className="card-title"><FaLaptop /><h3>Appearance</h3></div>
-          <p>Switch between light and dark themes across the application.</p>
-          <div className="setting-footer">
-            <span>Current theme: {darkMode ? "dark" : "light"}</span>
-            <button className="theme-btn" onClick={() => setDarkMode?.(!darkMode)}><FaMoon /></button>
-          </div>
-        </div>
-
-        <div className="settings-card">
-          <div className="card-title"><FaBell /><h3>Notifications</h3></div>
-          <p>Control in-app alerts for employee and attendance activity.</p>
-          <label className="checkbox">
-            <input type="checkbox" checked={notificationEnabled} onChange={toggleNotifications} />
-            Notify when employees are added or updated
-          </label>
-        </div>
-
-        <div className="settings-card">
-          <div className="card-title"><FaUser /><h3>Account</h3></div>
-          <div className="account-info">
-            <div className="avatar">{name?.charAt(0).toUpperCase()}</div>
-            <div><h4>{name}</h4><p>{email}</p><span className={`role-badge ${role}`}>{role}</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div className="request-card">
-        <div className="card-title"><FaShieldAlt /><h3>Pending Role Requests</h3></div>
-        {myRoleRequests.length > 0 ? (
-          myRoleRequests.map((request) => (
-            <div key={request.id} className="request-item">
-              <p>Request sent to: {request.adminEmail}</p>
-              <span className={`status ${normalizeStatus(request.status)}`}>{request.status}</span>
-            </div>
-          ))
-        ) : (
-          <p>No pending role change requests for {email}.</p>
-        )}
+      <div className="admin-settings-shell">
+        <aside className="settings-tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              className={activeTab === tab.id ? "active" : ""}
+              onClick={() => setActiveTab(tab.id)}
+            >
+              <span>{tab.icon}</span>
+              {tab.label}
+            </button>
+          ))}
+        </aside>
+        <main className="settings-main-panel">{renderTabContent()}</main>
       </div>
     </div>
   );

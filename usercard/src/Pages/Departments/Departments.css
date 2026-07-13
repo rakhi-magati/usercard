@@ -71,6 +71,24 @@
   gap: 22px;
 }
 
+.departments-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #64748b;
+  padding: 30px 0;
+  font-size: 14px;
+}
+
+.departments-error {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+
 .department-card {
   background: white;
   border-radius: 16px;

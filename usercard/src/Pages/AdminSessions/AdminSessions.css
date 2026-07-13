@@ -387,6 +387,8 @@
 /* Side panel */
 .usm-side-panel {
     background: #fff;
+    /* width: 100%; */
+    max-width: 250px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
     padding: 18px;

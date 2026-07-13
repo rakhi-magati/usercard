@@ -21,6 +21,7 @@ import {
 } from "../../services/employeeService";
 
 import EmployeeForm from "../../Components/EmployeeForm";
+import { getAdminCompetencyDirectory } from "../../services/skillsService";
 
 import "./Employees.css";
 
@@ -202,6 +203,7 @@ function Employees() {
   );
   const [editId, setEditId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [skillsByEmployee, setSkillsByEmployee] = useState({});
 
   const employeesPerPage = 6;
   const companyId = getCompanyId();
@@ -240,7 +242,22 @@ function Employees() {
   useEffect(() => {
     fetchEmployees();
     fetchTransferHistory();
+    if (role === "admin") fetchSkillsDirectory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId]);
+
+  const fetchSkillsDirectory = async () => {
+    try {
+      const data = await getAdminCompetencyDirectory({ companyId });
+      const map = {};
+      (data || []).forEach((entry) => {
+        map[entry.employee_id] = entry.skills || [];
+      });
+      setSkillsByEmployee(map);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   const fetchTransferHistory = async () => {
     try {
@@ -542,6 +559,26 @@ function Employees() {
                     <div className="employee-details">
                       <h4>{employee.name}</h4>
                       <p>{employee.email}</p>
+                      {role === "admin" && (
+                        <div className="employee-skill-tags">
+                          {(skillsByEmployee[employee.id] || []).length ? (
+                            <>
+                              {skillsByEmployee[employee.id].slice(0, 3).map((skill) => (
+                                <span key={skill.id} className="employee-skill-tag">
+                                  {skill.skill_name}
+                                </span>
+                              ))}
+                              {skillsByEmployee[employee.id].length > 3 && (
+                                <span className="employee-skill-tag more">
+                                  +{skillsByEmployee[employee.id].length - 3} more
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            <span className="employee-skill-tag empty">No skills added</span>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </td>
@@ -676,7 +713,7 @@ function Employees() {
       )}
       {showModal && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="modal-content1">
             <EmployeeForm
               formData={formData}
               errors={errors}
